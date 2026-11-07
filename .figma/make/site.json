@@ -1,0 +1,11 @@
+{
+  "title": "Datespot",
+  "description": "Connect with real people in a professional Telegram dating group, featuring a seamless payment process, image gallery, and live chat for genuine interactions.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
