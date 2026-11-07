@@ -2,7 +2,7 @@ name: Deploy Datespot to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:
@@ -11,17 +11,17 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: github-pages
   cancel-in-progress: true
 
 jobs:
   deploy:
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Set up Node.js
@@ -32,17 +32,22 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Build site
-        run: npm run build -- --base=/deepavali/
+      - name: Build for GitHub Pages
+        env:
+          FIGMA_PUBLIC_URL: /${{ github.event.repository.name }}
+        run: npm run build
 
-      - name: Configure GitHub Pages
+      - name: Verify build
+        run: test -f dist/index.html
+
+      - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload site
+      - name: Upload website
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy website
         id: deployment
         uses: actions/deploy-pages@v4
