@@ -290,7 +290,7 @@ function LeadModal({ onClose, onComplete, gate = false }: { onClose?: () => void
   };
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center px-5 bg-black/60 backdrop-blur-sm"
+    <div className={`fixed inset-0 z-[999] flex items-center justify-center px-5 ${gate ? '' : 'bg-black/60 backdrop-blur-sm'}`}
       style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <motion.div className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={gate ? undefined : onClose} />
       <motion.div
@@ -926,7 +926,12 @@ export default function App() {
   if (!entered) {
     return (
       <ThemeProvider>
-        <div className="min-h-screen w-full" style={{ background: '#000000' }}>
+        <div className="min-h-screen w-full relative" style={{
+          backgroundColor: '#000000',
+          backgroundImage:
+            'radial-gradient(ellipse 60% 50% at 50% 45%, rgba(25,68,241,0.18), transparent 70%), radial-gradient(rgba(255,255,255,0.16) 1px, transparent 1.2px)',
+          backgroundSize: '100% 100%, 24px 24px',
+        }}>
           <LeadModal gate onComplete={() => setEntered(true)} />
         </div>
       </ThemeProvider>
