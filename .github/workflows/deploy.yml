@@ -1,4 +1,4 @@
-name: Deploy Datespot to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -18,27 +18,40 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
         with:
-          node-version: '22'
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: pnpm install --frozen-lockfile
 
-      - name: Build Vite website
+      - name: Build
         env:
-          FIGMA_PUBLIC_URL: /Datespot-Deepavali
-        run: npm run build
+          REPO_NAME: ${{ github.event.repository.name }}
+          # Optional repo variable PAGES_BASE_PATH (Settings > Secrets and variables > Actions > Variables).
+          # Set it to "/" if you use a custom domain.
+          BASE_OVERRIDE: ${{ vars.PAGES_BASE_PATH }}
+        run: |
+          if [ -n "$BASE_OVERRIDE" ]; then BASE="$BASE_OVERRIDE"
+          elif [[ "$REPO_NAME" == *.github.io ]]; then BASE="/"
+          else BASE="/$REPO_NAME"; fi
+          BASE="${BASE%/}"   # vite config appends the trailing slash
+          echo "Building with base='$BASE/'"
+          FIGMA_PUBLIC_URL="$BASE" pnpm build
 
-      - name: Check build output
-        run: test -f dist/index.html
+      - name: Add SPA 404 fallback
+        run: cp dist/index.html dist/404.html
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
@@ -49,6 +62,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
