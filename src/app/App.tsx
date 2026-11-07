@@ -364,9 +364,9 @@ function LeadModal({ onClose, onComplete, gate = false }: { onClose?: () => void
             <button type="submit" disabled={loading}
               className="w-full rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 mt-1"
               style={{
-                background: loading ? '#1a1212' : '#FF1F4B',
-                color: loading ? '#8A7275' : '#fff',
-                boxShadow: loading ? 'none' : '0 4px 20px rgba(255,31,75,0.4)',
+                background: loading ? '#0c1230' : '#1944F1',
+                color: loading ? '#6B7299' : '#fff',
+                boxShadow: loading ? 'none' : '0 4px 20px rgba(25,68,241,0.4)',
                 letterSpacing: '-0.01em',
               }}>
               {loading
