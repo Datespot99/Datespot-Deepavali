@@ -56,6 +56,12 @@ const ThemeCtx = React.createContext<{ theme: TTheme; toggle: () => void }>({
   theme: { ...DARK_THEME, isDark: true }, toggle: () => {},
 });
 const useT = (): TTheme => React.useContext(ThemeCtx).theme;
+// Dot-grid page background (white dots on dark, blue dots on light)
+const dotGridStyle = (T: TTheme): React.CSSProperties => ({
+  backgroundColor: T.DOT_BG,
+  backgroundImage: `radial-gradient(${T.isDark ? 'rgba(255,255,255,0.14)' : 'rgba(25,68,241,0.20)'} 1px, transparent 1.2px)`,
+  backgroundSize: '24px 24px',
+});
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {
   const isNight = () => { const h = new Date().getHours(); return h < 6 || h >= 20; };
@@ -792,7 +798,7 @@ function MobileApp() {
 
   return (
     <div ref={constraintsRef} className="min-h-screen w-full relative overflow-x-hidden"
-      style={{ background: T.DOT_BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      style={{ ...dotGridStyle(T), fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <ThemeToggle />
 
       {/* Urgency Banner */}
@@ -979,7 +985,7 @@ function DesktopVersion({ onOpenPayment, showPayment, onClosePayment, paymentTyp
   const avatarColors = AVATAR_COLORS;
 
   return (
-    <div className="min-h-screen w-full relative" style={{ background: T.DOT_BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className="min-h-screen w-full relative" style={{ ...dotGridStyle(T), fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <ThemeToggle />
       <UrgencyBanner />
 
