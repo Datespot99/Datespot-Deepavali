@@ -40,14 +40,17 @@ jobs:
           BASE_OVERRIDE: ${{ vars.PAGES_BASE_PATH }}
         run: |
           if [ -n "$BASE_OVERRIDE" ]; then BASE="$BASE_OVERRIDE"
+          elif [ -f CNAME ]; then BASE="/"   # custom domain => served from root
           elif [[ "$REPO_NAME" == *.github.io ]]; then BASE="/"
           else BASE="/$REPO_NAME"; fi
           BASE="${BASE%/}"   # vite config appends the trailing slash
           echo "Building with base='$BASE/'"
           FIGMA_PUBLIC_URL="$BASE" pnpm build
 
-      - name: Add SPA 404 fallback
-        run: cp dist/index.html dist/404.html
+      - name: Add SPA 404 fallback and CNAME
+        run: |
+          cp dist/index.html dist/404.html
+          if [ -f CNAME ]; then cp CNAME dist/CNAME; fi
 
       - uses: actions/configure-pages@v5
 
