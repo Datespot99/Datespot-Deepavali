@@ -12,7 +12,6 @@ import { QRCodeSVG } from 'qrcode.react';
 import confetti from 'canvas-confetti';
 import toast, { Toaster } from 'react-hot-toast';
 import chatAvatar   from '../imports/photo_1_2026-09-07_13-39-47.jpg';
-import datespotLogo from '../imports/image.png';
 import galleryImg1  from '../imports/Screenshot_2026_08_10_21_56_20_91_948cd9899890cbd5c2798760b2b95377.jpg';
 import galleryImg2  from '../imports/Screenshot_2026_08_10_21_56_34_83_948cd9899890cbd5c2798760b2b95377.jpg';
 import galleryImg3  from '../imports/Screenshot_2026_08_10_21_57_02_74_948cd9899890cbd5c2798760b2b95377.jpg';
@@ -402,7 +401,7 @@ function LeadModal({ onClose, onComplete, gate = false }: { onClose?: () => void
         </button>}
         <div className="px-5 py-5 sm:px-9 sm:py-9">
           <div className="flex justify-center items-center gap-2 mb-4 sm:mb-7">
-            <img src="/datespot-payment-logo.webp" alt="" className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover" />
+            <img src="/datespot-logo.svg" alt="" className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover" />
             <span className="font-extrabold text-white text-xl tracking-tight">Datespot</span>
           </div>
           <div className="text-center mb-5 sm:mb-6">
@@ -1428,7 +1427,7 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
 
         {/* Header */}
         <div className="px-4 pt-4 pb-3 flex items-center gap-2.5">
-          <img src="/datespot-payment-logo.webp" alt="Datespot logo"
+          <img src="/datespot-logo.svg" alt="Datespot logo"
             className="w-10 h-10 rounded-xl shrink-0 object-cover" />
           <div className="flex-1 min-w-0">
             <div className="font-bold text-sm leading-none text-gray-900">Join Datespot</div>
