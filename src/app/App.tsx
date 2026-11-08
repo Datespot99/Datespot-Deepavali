@@ -115,7 +115,7 @@ const REVIEWS = [
   { name: 'Aditya P.',      area: 'Whitefield',   text: "Was skeptical at first but it's 100% worth it. The voice call feature is a great way to vibe before meeting." },
   { name: 'Rohan Gowda.',   area: 'JP Nagar',     text: 'Already arranged a meet within my first week. Active group, daily new faces. Super recommend bro.' },
   { name: 'Suresh Naik.',   area: 'Marathahalli', text: 'Met my current girlfriend here lol. Very organised, zero spam and the admin actually screens people.' },
-  { name: 'Arjun K.',       area: 'Jayanagar',    text: 'Best ₹100 I have spent this year honestly. The group is always active, quality women from Bangalore.' },
+  { name: 'Arjun K.',       area: 'Jayanagar',    text: 'Best ₹399 I have spent this year honestly. The group is always active, quality women from Bangalore.' },
   { name: 'Dev Menon.',     area: 'BTM Layout',   text: 'Three meets in two months. The vibe here is very different from regular apps — feels real and personal.' },
   { name: 'Sagar R.',       area: 'Electronic City', text: 'Legit group. Admin does proper verification so you know everyone is genuine. No nonsense.' },
   { name: 'Nikhil T.',      area: 'Yelahanka',    text: 'Joined on a friend\'s suggestion and I\'m glad I did. Active daily, good conversations and easy to arrange meets.' },
@@ -616,7 +616,7 @@ function StatsSection() {
 function HowItWorks({ onJoin }: { onJoin: () => void }) {
   const T = useT();
   const steps = [
-    { icon: CreditCard, label: 'Pay Entry Fee', desc: 'One-time ₹100 payment via UPI', c1: B1, c2: '#FF6B35' },
+    { icon: CreditCard, label: 'Pay Entry Fee', desc: 'One-time ₹399 payment via UPI', c1: B1, c2: '#FF6B35' },
     { icon: Send,       label: 'Join Datespot', desc: 'Receive the Telegram group link instantly', c1: '#10B981', c2: '#34D399' },
     { icon: Heart,      label: 'Start Dating',  desc: 'Chat, call & meet verified women', c1: '#EC4899', c2: '#F97316' },
   ];
@@ -786,7 +786,7 @@ function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
   const items = [
     { q: 'Is this genuine?', a: 'Yes. Datespot has been running since 2021 with 548+ verified members. Every member is manually approved by Subhash Gowda before getting access.' },
-    { q: 'How do I get access?', a: 'Pay ₹100 via UPI, upload the payment screenshot, and you receive the Telegram group link instantly. The whole process takes under 2 minutes.' },
+    { q: 'How do I get access?', a: 'Pay ₹399 via UPI, upload the payment screenshot, and you receive the Telegram group link instantly. The whole process takes under 2 minutes.' },
     { q: 'Are profiles verified?', a: 'Every profile is manually verified by the admin. Fake profiles, bots, and spam accounts are removed immediately — zero tolerance policy.' },
     { q: 'Is my privacy protected?', a: 'Absolutely. Your personal details are never shared with other members. The group has strict privacy rules and all screenshots of members are prohibited.' },
     { q: 'How quickly do I receive access?', a: 'Access is sent within minutes of payment confirmation, typically under 5 minutes. Admin support is available daily for any delays.' },
@@ -826,7 +826,7 @@ function StickyCTA({ onJoin }: { onJoin: () => void }) {
             <div className="relative flex items-center justify-center gap-3 py-3.5 px-6">
               <span className="font-black text-white text-sm tracking-tight">Join Datespot</span>
               <span className="text-white/75 text-[11px] line-through font-semibold">₹999</span>
-              <span className="font-black text-white text-sm">₹100</span>
+              <span className="font-black text-white text-sm">₹399</span>
               <ArrowRight className="w-4 h-4 text-white" />
             </div>
           </motion.button>
@@ -888,7 +888,7 @@ function MobileApp() {
               {/* Price */}
               <div className="flex items-baseline gap-2 justify-center">
                 <span className="text-sm line-through font-semibold" style={{ color: T.MUTED }}>₹999</span>
-                <span className="font-black text-4xl leading-none" style={{ color: B1 }}>₹100</span>
+                <span className="font-black text-4xl leading-none" style={{ color: B1 }}>₹399</span>
               </div>
 
               {/* CTA Button */}
@@ -1066,7 +1066,7 @@ function DesktopVersion({ onOpenPayment, showPayment, onClosePayment, paymentTyp
             <h2 className="font-extrabold mb-2" style={{ color: T.DARK, fontSize: 40, letterSpacing: '-0.03em' }}>Ready to Join?</h2>
             <div className="flex items-baseline gap-2 justify-center mb-6">
               <span className="text-lg line-through font-semibold" style={{ color: T.MUTED }}>₹999</span>
-              <span className="font-black" style={{ fontSize: 48, color: B1, lineHeight: 1 }}>₹100</span>
+              <span className="font-black" style={{ fontSize: 48, color: B1, lineHeight: 1 }}>₹399</span>
             </div>
             <button onClick={() => onOpenPayment('full')}
               className="rounded-2xl font-black text-white text-lg flex items-center gap-3 mx-auto relative overflow-hidden transition-all hover:scale-105 mb-4"
@@ -1247,7 +1247,7 @@ function ChatOverlay({ onClose, onOpenPayment }: { onClose: () => void; onOpenPa
                   <button onClick={() => { toast.success('Opening payment...'); onClose(); setTimeout(() => onOpenPayment(), 300); }}
                     className="px-5 py-2.5 rounded-2xl text-white font-bold text-xs active:scale-95 transition-transform shadow-md"
                     style={{ background: HERO_GRAD }}>
-                    Join for ₹100
+                    Join for ₹399
                   </button>
                 ) : (
                   <div className="px-3.5 py-2.5 text-xs shadow-sm"
@@ -1352,7 +1352,7 @@ type UploadState = 'idle' | 'verifying' | 'success';
 
 function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentType: 'full' | 'demo' }) {
   const UPI_ID        = 'BHARATPE2R0S0C1D6V46619@unitype';
-  const AMOUNT        = '100';
+  const AMOUNT        = '399';
   const ORIGINAL_AMT  = '999';
   const TELEGRAM_LINK = 'https://t.me/+wRAGkbTVLLA0YzQ1';
   const upiUrl        = `upi://pay?pa=${UPI_ID}&pn=Datespot&am=${AMOUNT}&cu=INR`;
