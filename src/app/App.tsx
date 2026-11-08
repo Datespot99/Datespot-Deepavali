@@ -767,7 +767,7 @@ function StickyCTA({ onJoin }: { onJoin: () => void }) {
               style={{ background: 'rgba(255,255,255,0.14)', width: '60%' }} />
             <div className="relative flex items-center justify-center gap-3 py-3.5 px-6">
               <span className="font-black text-white text-sm tracking-tight">Join Datespot</span>
-              <span className="text-white/40 text-[11px] line-through font-semibold">₹999</span>
+              <span className="text-white/75 text-[11px] line-through font-semibold">₹999</span>
               <span className="font-black text-white text-sm">₹99</span>
               <ArrowRight className="w-4 h-4 text-white" />
             </div>
@@ -830,7 +830,7 @@ function MobileApp() {
               {/* Price */}
               <div className="flex items-baseline gap-2 justify-center">
                 <span className="text-sm line-through font-semibold" style={{ color: T.MUTED }}>₹999</span>
-                <span className="font-black text-4xl leading-none" style={{ color: 'var(--background)' }}>₹99</span>
+                <span className="font-black text-4xl leading-none" style={{ color: B1 }}>₹99</span>
               </div>
 
               {/* CTA Button */}
@@ -1399,12 +1399,12 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
                     <div className="rounded-2xl p-3 mb-2 flex items-center justify-center" style={{ background: `${B1}06` }}>
                       <QRCodeSVG value={upiUrl} size={148} level="H" />
                     </div>
-                    <p className="text-center text-[10px] mb-2 font-medium" style={{ color: MUTED }}>Scan with any UPI app</p>
+                    <p className="text-center text-[10px] mb-2 font-medium" style={{ color: "#475569" }}>Scan with any UPI app</p>
                   </motion.div>
                 ) : (
                   <motion.div key="upi" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-3">
                     <div className="rounded-2xl p-4 mb-2" style={{ background: `${B1}06` }}>
-                      <p className="text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: MUTED }}>UPI ID</p>
+                      <p className="text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "#475569" }}>UPI ID</p>
                       <p className="font-mono text-sm font-bold break-all mb-4 text-gray-800">{UPI_ID}</p>
                       <div className="flex gap-2">
                         <button onClick={() => { navigator.clipboard.writeText(UPI_ID); toast.success('Copied!'); }}
@@ -1425,7 +1425,7 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
               </AnimatePresence>
 
               <div className="pt-3 mt-1" style={{ borderTop: `1px solid ${B1}12` }}>
-                <p className="text-center text-[10px] mb-2 font-medium" style={{ color: MUTED }}>Upload screenshot to verify payment</p>
+                <p className="text-center text-[10px] mb-2 font-medium" style={{ color: "#475569" }}>Upload screenshot to verify payment</p>
                 <input type="file" id="ss-upload" className="hidden" accept="image/*" onChange={handleFileChange} />
                 <label htmlFor="ss-upload"
                   className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl text-white font-bold text-sm cursor-pointer active:scale-95 transition-transform"
