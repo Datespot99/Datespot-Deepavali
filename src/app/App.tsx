@@ -295,94 +295,98 @@ function LeadModal({ onClose, onComplete, gate = false }: { onClose?: () => void
     }
   };
 
+  const portraits = [
+    { pos: '0%', side: 'left', near: false },
+    { pos: '33.333%', side: 'left', near: true },
+    { pos: '66.667%', side: 'right', near: true },
+    { pos: '100%', side: 'right', near: false },
+  ] as const;
+
   return (
-    <div className={`fixed inset-0 z-[999] flex items-center justify-center px-5 ${gate ? '' : 'bg-black/60 backdrop-blur-sm'}`}
-      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className={`fixed inset-0 z-[999] flex items-center justify-center overflow-hidden px-5 ${gate ? '' : 'bg-black/70'}`}
+      style={{
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
+        backgroundColor: '#030714',
+        backgroundImage: "radial-gradient(ellipse 58% 53% at 50% 50%,rgba(25,68,241,.20),transparent 80%),radial-gradient(circle,rgba(114,130,175,.22) 1px,transparent 1px)",
+        backgroundSize: 'auto, 22px 22px',
+      }}>
       <motion.div className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={gate ? undefined : onClose} />
+
+      {/* Atmospheric portraits sit behind, never over, the form. */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        {portraits.map((photo, i) => (
+          <div key={i}
+            className="absolute rounded-[24px] overflow-hidden"
+            style={{
+              width: photo.near ? 'clamp(100px,17vw,210px)' : 'clamp(90px,14vw,175px)',
+              height: photo.near ? 'clamp(178px,26vw,315px)' : 'clamp(155px,23vw,275px)',
+              top: photo.near ? 'calc(50% - 160px)' : 'calc(50% - 125px)',
+              left: photo.side === 'left' ? (photo.near ? 'calc(50% - 410px)' : 'calc(50% - 575px)') : undefined,
+              right: photo.side === 'right' ? (photo.near ? 'calc(50% - 410px)' : 'calc(50% - 575px)') : undefined,
+              transform: `rotate(${photo.side === 'left' ? (photo.near ? -11 : -17) : (photo.near ? 11 : 17)}deg)`,
+              border: '1px solid rgba(77,94,241,.55)',
+              boxShadow: '0 8px 35px rgba(13,33,127,.22)',
+              opacity: 0.50,
+              backgroundImage: "linear-gradient(rgba(3,7,20,.47),rgba(3,7,20,.47)),url('/signup-portraits.webp')",
+              backgroundSize: '100% 100%, 400% 100%',
+              backgroundPosition: `center, ${photo.pos} center`,
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+        ))}
+      </div>
+
       <motion.div
-        initial={{ opacity: 0, y: 28, scale: 0.95 }}
+        initial={{ opacity: 0, y: 22, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 16, scale: 0.96 }}
-        transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-full max-w-[340px] rounded-2xl overflow-hidden"
-        style={{ background: '#050A1A', border: '1px solid rgba(25,68,241,0.15)', boxShadow: '0 32px 80px rgba(0,0,0,0.9)' }}>
-
-        {/* Top accent */}
-        <div className="h-[2px]" style={{ background: '#1944F1' }} />
-
-        {/* Close */}
-        {!gate && <button onClick={onClose} className="absolute top-3.5 right-3.5 w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/10">
-          <X className="w-3.5 h-3.5" style={{ color: '#6B7299' }} />
+        exit={{ opacity: 0, y: 12, scale: 0.97 }}
+        transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
+        role="dialog" aria-modal="true" aria-label="Enter your details"
+        className="relative z-10 w-full max-w-[440px] rounded-[24px] overflow-hidden"
+        style={{ background: '#050A1A', border: '1px solid #1944F1', boxShadow: '0 28px 80px rgba(0,0,0,.75),0 0 48px rgba(25,68,241,.11)' }}>
+        {!gate && <button onClick={onClose} aria-label="Close" className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10">
+          <X className="w-4 h-4" style={{ color: '#9CA9C5' }} />
         </button>}
-
-        <div className="px-7 pt-6 pb-7">
-          <div className="mb-5">
-            <h2 className="text-base font-extrabold text-white mb-1" style={{ letterSpacing: '-0.02em' }}>
-              Enter your details
-            </h2>
-            <p className="text-[12px]" style={{ color: '#6B7299' }}>Enter your name and number to continue</p>
+        <div className="px-7 py-8 sm:px-9 sm:py-9">
+          <div className="flex justify-center items-center gap-2.5 mb-7">
+            <img src="/datespot-payment-logo.webp" alt="" className="w-10 h-10 rounded-xl object-cover" />
+            <span className="font-extrabold text-white text-xl tracking-tight">Datespot</span>
           </div>
-
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-extrabold text-white tracking-tight mb-1.5">Enter Your Details</h2>
+            <p className="text-xs sm:text-sm" style={{ color: '#A6B2CF' }}>Join now and get instant access.</p>
+          </div>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {/* Name */}
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#6B7299' }}>Name</label>
-              <input
-                type="text" placeholder="Your full name"
+              <label htmlFor="ds-signup-name" className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#BCC7E3' }}>Full Name</label>
+              <input id="ds-signup-name" type="text" autoComplete="name" placeholder="Enter your full name"
                 value={name} onChange={e => setName(e.target.value)}
-                className="w-full rounded-xl px-4 py-3 outline-none text-[13px] font-semibold transition-all"
-                style={{
-                  background: '#030715',
-                  border: `1px solid ${name ? 'rgba(25,68,241,0.7)' : 'rgba(255,255,255,0.08)'}`,
-                  color: '#F5F3F3', caretColor: '#1944F1',
-                }}
-              />
+                className="w-full rounded-xl px-4 py-3.5 outline-none text-sm font-semibold transition-all"
+                style={{ background: '#030715', border: `1px solid ${name ? '#5474FF' : '#303A54'}`, color: '#F5F3F3', caretColor: '#1944F1' }} />
             </div>
-
-            {/* Phone */}
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#6B7299' }}>Phone</label>
-              <div className="flex items-center rounded-xl overflow-hidden transition-all"
-                style={{
-                  background: '#030715',
-                  border: `1px solid ${phone ? 'rgba(25,68,241,0.7)' : 'rgba(255,255,255,0.08)'}`,
-                }}>
-                <span className="px-3.5 py-3 text-[13px] font-bold shrink-0"
-                  style={{ color: '#7A88AA', borderRight: '1px solid rgba(255,255,255,0.08)' }}>+91</span>
-                <input
-                  type="tel" placeholder="10-digit number"
-                  value={phone} maxLength={10}
+              <label htmlFor="ds-signup-phone" className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#BCC7E3' }}>Mobile Number</label>
+              <div className="flex items-center rounded-xl overflow-hidden"
+                style={{ background: '#030715', border: `1px solid ${phone ? '#5474FF' : '#303A54'}` }}>
+                <span className="px-3.5 py-3.5 text-sm font-bold shrink-0" style={{ color: '#B0C1EE', borderRight: '1px solid #303A54' }}>+91</span>
+                <input id="ds-signup-phone" type="tel" inputMode="numeric" autoComplete="tel-national"
+                  placeholder="Enter 10-digit number" value={phone} maxLength={10}
                   onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
-                  className="flex-1 px-3.5 py-3 outline-none text-[13px] font-semibold bg-transparent"
-                  style={{ color: '#F5F3F3', caretColor: '#1944F1' }}
-                />
+                  className="flex-1 min-w-0 px-3.5 py-3.5 outline-none text-sm font-semibold bg-transparent"
+                  style={{ color: '#F5F3F3', caretColor: '#1944F1' }} />
               </div>
             </div>
-
             {error && (
               <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
-                className="text-[11px] font-semibold text-red-400 bg-red-950/30 px-3 py-2 rounded-lg"
-                style={{ border: '1px solid rgba(239,68,68,0.2)' }}>
-                {error}
-              </motion.p>
+                className="text-xs font-semibold text-red-300 bg-red-950/30 px-3 py-2 rounded-lg"
+                style={{ border: '1px solid rgba(239,68,68,.3)' }}>{error}</motion.p>
             )}
-
             <button type="submit" disabled={loading}
-              className="w-full rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 mt-1"
-              style={{
-                background: loading ? '#0c1230' : '#1944F1',
-                color: loading ? '#6B7299' : '#fff',
-                boxShadow: loading ? 'none' : '0 4px 20px rgba(25,68,241,0.4)',
-                letterSpacing: '-0.01em',
-              }}>
-              {loading
-                ? <Loader2 className="w-4 h-4 animate-spin" />
-                : <><span>{gate ? 'Continue' : 'Continue to Payment'}</span><ArrowRight className="w-4 h-4" /></>}
+              className="w-full rounded-xl py-3.5 mt-1 font-extrabold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[.98] disabled:opacity-70"
+              style={{ background: '#1944F1', color: '#FFFFFF', boxShadow: '0 6px 22px rgba(25,68,241,.25)' }}>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><span>{gate ? 'Continue' : 'Continue to Payment'}</span><ArrowRight className="w-4 h-4" /></>}
             </button>
-
-            <p className="text-center text-[10px] font-medium" style={{ color: '#3a3f60' }}>
-              🔒 Your info is private &amp; never shared
-            </p>
+            <p className="text-center text-[11px] font-medium" style={{ color: '#8999BD' }}>🔒 Your info is private &amp; never shared</p>
           </form>
         </div>
       </motion.div>
