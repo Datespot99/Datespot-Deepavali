@@ -1425,11 +1425,11 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
               </AnimatePresence>
 
               {/* UPI apps accepted: reference image */}
-              <div className="rounded-xl p-2 mb-3" style={{ background: '#FFFFFF', border: '1px solid rgba(25,68,241,0.12)' }}>
+              <div className="rounded-lg px-2 py-1 mb-2 max-w-[240px] mx-auto" style={{ background: '#FFFFFF', border: '1px solid rgba(25,68,241,0.12)' }}>
                 <img
                   src="/upi-apps-accepted.webp"
                   alt="UPI, Paytm, Google Pay and PhonePe accepted"
-                  className="block w-full h-auto max-h-[140px] object-contain mx-auto rounded-lg"
+                  className="block w-full h-auto max-h-[90px] object-contain mx-auto rounded-md"
                   loading="lazy"
                 />
               </div>
