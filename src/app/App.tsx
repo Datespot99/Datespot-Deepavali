@@ -1037,81 +1037,136 @@ function DesktopWrapper() {
 function DesktopHero() {
   const T = useT();
   const [previewIndex, setPreviewIndex] = useState(0);
+  const [previewPaused, setPreviewPaused] = useState(false);
+
   useEffect(() => {
-    const timer = window.setInterval(() => setPreviewIndex(index => (index + 1) % IMAGES.length), 2800);
+    // Respect reduced-motion preferences while keeping manual navigation available.
+    if (previewPaused || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const timer = window.setInterval(
+      () => setPreviewIndex(index => (index + 1) % IMAGES.length),
+      3200,
+    );
     return () => window.clearInterval(timer);
-  }, []);
+  }, [previewPaused]);
+
   const changePreview = (offset: number) =>
     setPreviewIndex(index => (index + offset + IMAGES.length) % IMAGES.length);
 
   return (
-    <section className="max-w-6xl mx-auto px-8 pt-14 pb-12">
-      <div className="grid md:grid-cols-2 gap-10 items-center">
-        <div>
-          <span className="inline-flex items-center rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-widest mb-6"
-            style={{ color: B1, background: T.CARD_BG, border: '1px solid ' + B1 + '44' }}>
+    <section className="max-w-7xl mx-auto px-8 lg:px-12 pt-12 lg:pt-16 pb-5">
+      <div className="grid grid-cols-2 gap-6 lg:gap-12 xl:gap-16 items-center">
+        <div className="min-w-0">
+          <div className="inline-flex items-center rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-widest mb-7"
+            style={{ color: B1, background: T.isDark ? 'rgba(25,68,241,.13)' : '#FFFFFF', border: '1px solid rgba(25,68,241,.22)' }}>
             Datespot · Bangalore
-          </span>
-          <h1 className="font-black leading-[1.12] mb-6" style={{ color: T.DARK, fontSize: 'clamp(38px,4vw,56px)', letterSpacing: '-0.05em' }}>
+          </div>
+          <h1 className="font-black leading-[1.1] mb-7"
+            style={{ color: T.DARK, fontSize: 'clamp(36px,4.1vw,60px)', letterSpacing: '-0.05em' }}>
             Meet people. <span style={{ color: B1 }}>Make connections.</span>
           </h1>
-          <p className="text-lg leading-relaxed max-w-lg mb-7" style={{ color: T.MUTED }}>
+          <p className="text-base lg:text-lg leading-relaxed max-w-lg mb-8" style={{ color: T.MUTED }}>
             Discover a Telegram community with group chats, voice calls and opportunities to meet in person.
           </p>
-          <div className="flex flex-wrap gap-2.5">
-            {['Group chats', 'Voice calls', 'Direct meets'].map((label) => (
-              <span key={label} className="px-4 py-2 rounded-xl text-xs font-bold"
-                style={{ color: T.DARK, background: T.CARD_BG, border: '1px solid ' + T.BORDER }}>
-                {label}
-              </span>
-            ))}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-4">
+            {[
+              { label: 'Group chats', icon: Users },
+              { label: 'Voice calls', icon: Mic },
+              { label: 'Direct meets', icon: MapPin },
+            ].map(item => {
+              const Icon = item.icon;
+              return (
+                <div key={item.label} className="flex items-center gap-2.5 text-xs lg:text-sm font-bold"
+                  style={{ color: T.DARK }}>
+                  <span className="w-9 h-9 rounded-xl inline-flex items-center justify-center"
+                    style={{ background: T.isDark ? 'rgba(25,68,241,.22)' : '#E8EEFF' }}>
+                    <Icon className="w-4 h-4" style={{ color: B1 }} />
+                  </span>
+                  {item.label}
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Same preview content and photo-swiping feel as the mobile Group Preview. */}
-        <div className="rounded-3xl p-5 lg:p-6"
-          style={{ background: T.CARD_BG, border: '1px solid ' + B1 + '40', boxShadow: T.isDark ? '0 14px 45px rgba(0,0,0,0.28)' : '0 12px 36px rgba(25,68,241,0.09)' }}>
-          <div className="flex items-start justify-between gap-3 mb-4">
+        {/* Borderless preview is part of the hero, not a second card. */}
+        <div className="relative min-w-0"
+          onMouseEnter={() => setPreviewPaused(true)}
+          onMouseLeave={() => setPreviewPaused(false)}
+          onFocus={() => setPreviewPaused(true)}
+          onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) setPreviewPaused(false); }}>
+          <div className="relative z-10 flex items-start justify-between gap-3 px-1 lg:px-3">
             <div>
-              <h2 className="text-xl font-extrabold mb-1" style={{ color: T.DARK }}>Group Preview</h2>
-              <p className="text-xs font-semibold" style={{ color: T.MUTED }}>See what's inside the group</p>
-            </div>
-            <span className="shrink-0 text-xs font-extrabold rounded-full px-3 py-1.5 text-white tabular-nums" style={{ background: B1 }}>
-              {previewIndex + 1} / {IMAGES.length}
-            </span>
-          </div>
-          <div className="relative flex items-center justify-center gap-4">
-            <button type="button" onClick={() => changePreview(-1)} aria-label="Previous group preview"
-              className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-lg font-bold transition-opacity hover:opacity-75"
-              style={{ color: B1, border: '1px solid ' + B1 + '55', background: T.CARD_BG }}>
-              ‹
-            </button>
-            <div className="relative w-[205px] xl:w-[220px] shrink-0">
-              <div className="absolute inset-0 rounded-3xl blur-xl opacity-20" style={{ background: B1 }} />
-              <div className="relative w-full aspect-[9/16] overflow-hidden rounded-3xl"
-                style={{ background: '#0B1125', border: '2px solid ' + B1 + '44', boxShadow: '0 12px 25px rgba(0,0,0,0.16)' }}>
-                <AnimatePresence mode="wait">
-                  <motion.img key={previewIndex} src={IMAGES[previewIndex]} alt={`Group preview screenshot ${previewIndex + 1}`}
-                    initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -18 }}
-                    transition={{ duration: 0.28 }}
-                    className="absolute inset-0 w-full h-full object-cover" />
-                </AnimatePresence>
-                <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5">
-                  {IMAGES.map((_, i) => (
-                    <button key={i} type="button" onClick={() => setPreviewIndex(i)}
-                      aria-label={`Show group preview ${i + 1}`} aria-current={i === previewIndex ? 'true' : undefined}
-                      className="rounded-full transition-all"
-                      style={{ width: i === previewIndex ? 18 : 6, height: 6,
-                        background: i === previewIndex ? '#FFFFFF' : 'rgba(255,255,255,0.6)' }} />
-                  ))}
-                </div>
+              <div className="flex items-center gap-2.5">
+                <Users className="w-5 h-5" style={{ color: B1 }} />
+                <h2 className="font-extrabold text-lg lg:text-xl" style={{ color: T.DARK }}>Group Preview</h2>
               </div>
+              <p className="text-xs lg:text-sm font-medium pl-8 mt-1" style={{ color: T.MUTED }}>
+                See what's inside the group
+              </p>
             </div>
-            <button type="button" onClick={() => changePreview(1)} aria-label="Next group preview"
-              className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-lg font-bold transition-opacity hover:opacity-75"
-              style={{ color: B1, border: '1px solid ' + B1 + '55', background: T.CARD_BG }}>
-              ›
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="font-extrabold text-xs tabular-nums mr-1" style={{ color: B1 }}>
+                {previewIndex + 1} / {IMAGES.length}
+              </span>
+              <button type="button" onClick={() => changePreview(-1)} aria-label="Previous group preview"
+                className="w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
+                style={{ color: B1, background: T.CARD_BG, border: '1px solid rgba(25,68,241,.26)' }}>
+                <ChevronDown className="w-4 h-4 rotate-90" />
+              </button>
+              <button type="button" onClick={() => changePreview(1)} aria-label="Next group preview"
+                className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-transform hover:scale-105 active:scale-95"
+                style={{ background: B1 }}>
+                <ChevronDown className="w-4 h-4 -rotate-90" />
+              </button>
+            </div>
+          </div>
+
+          <div className="relative w-full h-[clamp(245px,28vw,355px)] mt-2" aria-label="Rotating group photo previews">
+            <div aria-hidden="true" className="pointer-events-none absolute rounded-full"
+              style={{ width: '79%', height: '78%', left: '11%', top: '11%',
+                background: T.isDark ? 'rgba(25,68,241,.11)' : 'rgba(25,68,241,.055)' }} />
+            {IMAGES.map((src, i) => {
+              const half = Math.floor(IMAGES.length / 2);
+              const offset = ((i - previewIndex + IMAGES.length + half) % IMAGES.length) - half;
+              const distance = Math.abs(offset);
+              const visible = distance <= 2;
+              return (
+                <button type="button" key={src} onClick={() => setPreviewIndex(i)}
+                  aria-label={`View group preview ${i + 1}`}
+                  aria-current={offset === 0 ? 'true' : undefined}
+                  aria-hidden={!visible} tabIndex={visible ? 0 : -1}
+                  className="absolute top-1/2 overflow-hidden rounded-[17px] lg:rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
+                  style={{
+                    left: `${50 + offset * 16}%`,
+                    width: 'clamp(108px,11.8vw,178px)',
+                    aspectRatio: '0.66',
+                    transform: `translate(-50%,-50%) translateY(${distance * 5}px) rotate(${offset * 5}deg) scale(${1 - distance * .085})`,
+                    transition: 'left .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1),opacity .35s ease',
+                    opacity: visible ? (distance === 2 ? .9 : 1) : 0,
+                    zIndex: visible ? 10 - distance : 0,
+                    pointerEvents: visible ? 'auto' : 'none',
+                    background: '#101729',
+                    border: offset === 0 ? `2px solid ${B1}` : '2px solid rgba(255,255,255,.8)',
+                    boxShadow: offset === 0
+                      ? '0 14px 30px rgba(25,68,241,.22)'
+                      : '0 8px 22px rgba(14,25,62,.13)',
+                  }}>
+                  <img src={src} alt={`Group preview ${i + 1}`}
+                    className="block w-full h-full object-cover" loading={distance < 2 ? 'eager' : 'lazy'} />
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center justify-center gap-2 mt-1">
+            {IMAGES.map((_, i) => (
+              <button key={i} type="button" onClick={() => setPreviewIndex(i)}
+                aria-label={`Show group preview ${i + 1}`}
+                aria-current={i === previewIndex ? 'true' : undefined}
+                className="rounded-full transition-all duration-300"
+                style={{ width: i === previewIndex ? 18 : 7, height: 7,
+                  background: i === previewIndex ? B1 : (T.isDark ? '#47547D' : '#C5D2F9') }} />
+            ))}
           </div>
         </div>
       </div>
@@ -1175,34 +1230,27 @@ function DesktopVersion({ onOpenPayment, showPayment, onClosePayment, paymentTyp
       <UrgencyBanner />
       <DesktopHero />
 
-      {/* Stats */}
-      <section className="max-w-5xl mx-auto px-8 py-12">
-        <StatsSection />
-      </section>
-
-      {/* Final CTA */}
-      <section className="max-w-3xl mx-auto px-8 pb-16">
-        <div className="rounded-3xl overflow-hidden relative" style={{ background: T.CARD_BG, border: `1px solid ${B1}30` }}>
-          <div className="h-[3px]" style={{ background: HERO_GRAD }} />
-          <div className="p-12 text-center">
-            <div className="mb-3"><DiwaliOrnaments /></div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-5"
-              style={{ background: `${B1}12`, border: `1px solid ${B1}40` }}>
-              <Sparkles className="w-4 h-4" style={{ color: B1 }} />
-              <span className="text-sm font-black uppercase tracking-widest" style={{ color: B1 }}>Diwali Biggest Sale</span>
-            </div>
-            <h2 className="font-extrabold mb-2" style={{ color: T.DARK, fontSize: 40, letterSpacing: '-0.03em' }}>Ready to Join?</h2>
-            <div className="flex items-baseline gap-2 justify-center mb-6">
-              <span className="text-lg line-through font-semibold" style={{ color: T.MUTED }}>₹999</span>
-              <span className="font-black" style={{ fontSize: 48, color: B1, lineHeight: 1 }}>₹399</span>
-            </div>
-            <button onClick={() => onOpenPayment('full')}
-              className="rounded-2xl font-black text-white text-lg flex items-center gap-3 mx-auto relative overflow-hidden transition-all hover:scale-105 mb-4"
-              style={{ background: HERO_GRAD, boxShadow: `0 8px 32px ${B1}50`, padding: '16px 40px' }}>
-              Join Datespot Now <ArrowRight className="w-5 h-5" />
-            </button>
-          </div>
+      {/* Integrated sale CTA: no separate card or boxed background. */}
+      <section className="relative max-w-7xl mx-auto px-8 pt-10 pb-16 text-center isolate">
+        <div aria-hidden="true" className="pointer-events-none absolute -z-10 rounded-[50%]"
+          style={{ width: '92%', height: 230, left: '4%', top: 115,
+            background: T.isDark ? 'rgba(25,68,241,.075)' : 'rgba(25,68,241,.045)' }} />
+        <div className="mb-3"><DiwaliOrnaments /></div>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4"
+          style={{ background: T.isDark ? 'rgba(25,68,241,.16)' : '#E9EEFF', color: B1 }}>
+          <Sparkles className="w-3.5 h-3.5" />
+          <span className="text-xs font-black uppercase tracking-widest">Diwali Biggest Sale</span>
         </div>
+        <h2 className="font-black text-4xl mb-2" style={{ color: T.DARK, letterSpacing: '-0.04em' }}>Ready to Join?</h2>
+        <div className="flex items-baseline gap-3 justify-center mb-5">
+          <span className="text-lg line-through font-semibold" style={{ color: T.MUTED }}>₹999</span>
+          <span className="font-black text-5xl leading-none" style={{ color: B1 }}>₹399</span>
+        </div>
+        <button type="button" onClick={() => onOpenPayment('full')}
+          className="w-full max-w-[360px] rounded-2xl font-extrabold text-white text-base inline-flex items-center justify-center gap-3 px-10 py-4 transition-transform hover:scale-[1.02] active:scale-[.98]"
+          style={{ background: B1, boxShadow: '0 8px 22px rgba(25,68,241,.18)' }}>
+          Join Datespot Now <ArrowRight className="w-5 h-5" />
+        </button>
       </section>
 
       {/* What You Get — row list */}
