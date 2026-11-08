@@ -1356,62 +1356,50 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6" style={{ background: 'rgba(13,24,58,0.82)' }}>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        className="absolute inset-0" onClick={uploadState === 'idle' ? onClose : undefined} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg p-4">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0" onClick={uploadState === 'idle' ? onClose : undefined} />
       <motion.div
-        initial={{ scale: 0.96, opacity: 0, y: 18 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.97, opacity: 0, y: 12 }}
-        transition={{ type: 'spring', damping: 28, stiffness: 310 }}
-        role="dialog" aria-modal="true" aria-label="Join Datespot payment"
-        className="relative w-full max-w-[460px] max-h-[94dvh] overflow-y-auto rounded-[26px] sm:rounded-[32px]"
-        style={{ background: '#FFFFFF', boxShadow: '0 28px 85px rgba(4,15,47,0.34)', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="relative w-full max-w-md max-h-[92dvh] overflow-y-auto rounded-3xl shadow-2xl bg-white">
+        {uploadState === 'idle' && (
+          <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full z-20 hover:bg-gray-100 transition-colors">
+            <X className="w-4 h-4 text-gray-400" />
+          </button>
+        )}
 
-        {/* Identity and price */}
-        <div className="flex items-center gap-3 px-5 pt-5 pb-4 sm:px-7 sm:pt-7">
+        {/* Header */}
+        <div className="px-4 pt-4 pb-3 flex items-center gap-2.5">
           <img src="/datespot-payment-logo.webp" alt="Datespot logo"
-            className="h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-2xl object-cover"
-            style={{ boxShadow: '0 4px 12px rgba(255,95,19,0.14)' }} />
-          <div className="min-w-0 flex-1">
-            <h2 className="font-extrabold text-[17px] sm:text-xl tracking-tight leading-tight" style={{ color: '#0E1942' }}>Join Datespot</h2>
-            <p className="text-[10px] sm:text-xs font-semibold mt-1 leading-snug" style={{ color: '#687598' }}>Lifetime access · Telegram Community</p>
+            className="w-10 h-10 rounded-xl shrink-0 object-cover" />
+          <div className="flex-1 min-w-0">
+            <div className="font-bold text-sm leading-none text-gray-900">Join Datespot</div>
+            <div className="text-[10px] mt-0.5 font-medium text-gray-400">Lifetime access · Telegram</div>
           </div>
-          <div className="shrink-0 text-right" style={{ paddingRight: uploadState === 'idle' ? 20 : 0 }}>
-            <div className="text-[11px] sm:text-xs line-through font-semibold" style={{ color: '#7F8BA9' }}>₹{ORIGINAL_AMT}</div>
-            <div className="text-[25px] sm:text-[28px] font-black leading-tight tracking-tight" style={{ color: B1 }}>₹{AMOUNT}</div>
+          <div className="text-right shrink-0 mr-7">
+            {ORIGINAL_AMT && <div className="text-[11px] line-through text-gray-400">₹{ORIGINAL_AMT}</div>}
+            <div className="font-extrabold text-2xl leading-none" style={{ color: B1 }}>₹{AMOUNT}</div>
           </div>
-          {uploadState === 'idle' && (
-            <button onClick={onClose} aria-label="Close payment" className="absolute top-4 right-3 sm:top-5 sm:right-4 rounded-full p-1.5 transition-colors hover:bg-slate-100">
-              <X className="h-4 w-4" style={{ color: '#8390A9' }} />
-            </button>
-          )}
         </div>
 
-        <div className="px-5 pb-5 sm:px-7 sm:pb-7">
+        <div className="px-4 pb-4">
           {uploadState === 'idle' && (
             <>
-              {/* Flat festive banner with a numeric-only timer */}
-              <div className="flex items-center justify-between gap-2 rounded-2xl px-3.5 py-3 sm:px-4 mb-4"
-                style={{ background: '#EDF0FF', border: '1px solid #D9DFFF' }}>
+              {/* Discount badge */}
+              <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl mb-3" style={{ background: '#EEF2FF', border: '1px solid #D6DFFF' }}>
                 <div className="flex items-center gap-2 min-w-0">
-                  <Sparkles className="w-4 h-4 shrink-0" style={{ color: B1 }} />
-                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.08em]" style={{ color: B1 }}>Diwali Biggest Sale</span>
+                  <Sparkles className="w-3.5 h-3.5 shrink-0" style={{ color: B1 }} />
+                  <p className="text-[10px] font-black uppercase tracking-wide" style={{ color: B1 }}>Diwali Biggest Sale</p>
                 </div>
-                <span role="timer" aria-label={`Countdown ${countdown}`}
-                  className="shrink-0 rounded-lg px-2.5 py-1.5 font-extrabold text-xs sm:text-sm tabular-nums"
-                  style={{ background: '#FFFFFF', color: '#D62839', border: '1px solid #E3E6F8' }}>{countdown}</span>
+                <span aria-label={`Countdown ${countdown}`} role="timer"
+                  className="text-[12px] font-extrabold tabular-nums rounded-md px-2 py-1 shrink-0"
+                  style={{ background: '#FFFFFF', border: '1px solid #D6DFFF', color: '#CF2937' }}>{countdown}</span>
               </div>
-
-              {/* Solid blue active tab, subdued inactive tab */}
-              <div className="flex rounded-2xl p-1 mb-4" style={{ background: '#EDF1FA' }}>
+              <div className="flex rounded-xl p-1 mb-3" style={{ background: '#F1F4FA' }}>
                 {(['qr', 'upi'] as const).map(t => (
                   <button key={t} onClick={() => setTab(t)}
-                    aria-selected={tab === t} role="tab"
-                    className="flex-1 rounded-xl py-2.5 sm:py-3 text-xs sm:text-sm font-extrabold transition-colors"
-                    style={tab === t
-                      ? { background: B1, color: '#FFFFFF', boxShadow: '0 3px 9px rgba(25,68,241,0.17)' }
-                      : { background: 'transparent', color: '#586786' }}>
+                    className="flex-1 py-2 rounded-xl text-xs font-bold transition-all"
+                    style={tab === t ? { background: B1, color: '#FFFFFF' } : { background: 'transparent', color: '#64748B' }}>
                     {t === 'qr' ? 'Scan QR' : 'UPI ID'}
                   </button>
                 ))}
@@ -1420,32 +1408,27 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
               <AnimatePresence mode="wait">
                 {tab === 'qr' ? (
                   <motion.div key="qr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <div className="flex justify-center items-center rounded-2xl py-4 sm:py-5"
-                      style={{ background: '#F6F8FF', border: '1px solid #ECF0FF' }}>
-                      <div className="rounded-2xl bg-white p-3 sm:p-4"
-                        style={{ boxShadow: '0 6px 25px rgba(25,68,241,0.08)' }}>
-                        <QRCodeSVG value={upiUrl} size={180} level="H" className="block w-[158px] h-[158px] sm:w-[180px] sm:h-[180px]" />
-                      </div>
+                    <div className="rounded-2xl p-3 mb-2 flex items-center justify-center" style={{ background: '#F8FAFC' }}>
+                      <QRCodeSVG value={upiUrl} size={148} level="H" />
                     </div>
-                    <p className="mt-2.5 mb-3 text-center text-[11px] sm:text-xs font-semibold" style={{ color: '#435374' }}>
-                      Scan with any UPI app
-                    </p>
+                    <p className="text-center text-[10px] mb-2 font-medium" style={{ color: "#475569" }}>Scan with any UPI app</p>
                   </motion.div>
                 ) : (
                   <motion.div key="upi" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-3">
-                    <div className="rounded-2xl p-4 sm:p-5" style={{ background: '#F6F8FF', border: '1px solid #ECF0FF' }}>
-                      <p className="text-[10px] font-black tracking-wider uppercase mb-2" style={{ color: '#546483' }}>UPI ID</p>
-                      <p className="font-mono text-[12px] sm:text-sm font-bold break-all mb-4" style={{ color: '#0E1942' }}>{UPI_ID}</p>
-                      <div className="flex gap-2.5">
+                    <div className="rounded-2xl p-4 mb-2" style={{ background: '#F8FAFC' }}>
+                      <p className="text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "#475569" }}>UPI ID</p>
+                      <p className="font-mono text-sm font-bold break-all mb-4 text-gray-800">{UPI_ID}</p>
+                      <div className="flex gap-2">
                         <button onClick={() => { navigator.clipboard.writeText(UPI_ID); toast.success('Copied!'); }}
-                          className="flex-1 py-3 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5"
-                          style={{ border: `1.5px solid ${B1}`, color: B1, background: '#FFFFFF' }}>
-                          <Copy className="w-4 h-4" /> Copy
+                          className="flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
+                          style={{ border: `1.5px solid ${B1}`, color: B1, background: 'white' }}>
+                          <Copy className="w-3.5 h-3.5" /> Copy
                         </button>
                         <a href={upiUrl}
-                          className="flex-1 py-3 rounded-xl font-extrabold text-xs sm:text-sm text-white flex items-center justify-center gap-1.5"
-                          style={{ background: B1 }} onClick={() => toast.success('Opening UPI app...')}>
-                          <ExternalLink className="w-4 h-4" /> Pay
+                          className="flex-1 py-3 rounded-xl font-bold text-sm text-white flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
+                          style={{ background: HERO_GRAD }}
+                          onClick={() => toast.success('Opening UPI app...')}>
+                          <ExternalLink className="w-3.5 h-3.5" /> Pay
                         </a>
                       </div>
                     </div>
@@ -1453,52 +1436,47 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
                 )}
               </AnimatePresence>
 
-              <div className="flex items-center gap-2 mb-2">
-                <div className="h-px flex-1" style={{ background: '#E5EAF5' }} />
-                <p className="text-center text-[10px] sm:text-xs font-bold whitespace-nowrap" style={{ color: '#566687' }}>All UPI apps accepted here</p>
-                <div className="h-px flex-1" style={{ background: '#E5EAF5' }} />
-              </div>
-              <div className="rounded-xl mx-auto mb-4 px-3 py-1.5 w-full max-w-[280px]"
-                style={{ background: '#FFFFFF', border: '1px solid #E3E9F7' }}>
-                <img src="/upi-apps-accepted.webp" alt="UPI, Paytm, Google Pay and PhonePe accepted"
-                  className="block w-full max-h-[95px] object-contain mx-auto" loading="lazy" />
+              {/* UPI apps accepted: reference image */}
+              <div className="rounded-lg px-2 py-1 mb-2 max-w-[220px] mx-auto" style={{ background: '#FFFFFF', border: '1px solid #E2E8F0' }}>
+                <img
+                  src="/upi-apps-accepted.webp"
+                  alt="UPI, Paytm, Google Pay and PhonePe accepted"
+                  className="block w-full h-auto max-h-[90px] object-contain mx-auto rounded-md"
+                  loading="lazy"
+                />
               </div>
 
-              {/* Clear final step */}
-              <div className="rounded-xl py-2.5 px-3 text-center mb-3"
-                style={{ background: '#F0F3FF' }}>
-                <p className="text-[11px] sm:text-xs font-semibold" style={{ color: '#4A5B82' }}>
-                  Upload screenshot to verify payment
-                </p>
+              <div className="pt-3 mt-1" style={{ borderTop: `1px solid ${B1}12` }}>
+                <p className="text-center text-[10px] mb-2 font-medium" style={{ color: "#475569" }}>Upload screenshot to verify payment</p>
+                <input type="file" id="ss-upload" className="hidden" accept="image/*" onChange={handleFileChange} />
+                <label htmlFor="ss-upload"
+                  className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl text-white font-bold text-sm cursor-pointer active:scale-95 transition-transform"
+                  style={{ background: B1 }}>
+                  <Upload className="w-4 h-4" /> Upload Screenshot
+                </label>
               </div>
-              <input type="file" id="ss-upload" className="hidden" accept="image/*" onChange={handleFileChange} />
-              <label htmlFor="ss-upload"
-                className="flex items-center justify-center gap-2.5 w-full py-4 rounded-2xl text-white font-extrabold text-sm sm:text-base cursor-pointer active:scale-[0.99] transition-transform"
-                style={{ background: B1, boxShadow: '0 7px 18px rgba(25,68,241,0.18)' }}>
-                <Upload className="w-5 h-5" /> Upload Screenshot
-                <ArrowRight className="w-4 h-4 ml-1" />
-              </label>
             </>
           )}
 
           {uploadState === 'verifying' && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-9">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: '#EDF0FF' }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-8">
+              <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: `${B1}12` }}>
                 <Loader2 className="w-8 h-8 animate-spin" style={{ color: B1 }} />
               </div>
-              <p className="font-extrabold text-base mb-1" style={{ color: '#0E1942' }}>Verifying Payment</p>
-              <p className="text-xs font-medium" style={{ color: '#6A7794' }}>Please wait a moment...</p>
+              <p className="font-bold text-base mb-1 text-gray-900">Verifying Payment</p>
+              <p className="text-xs font-medium text-gray-400">Please wait a moment...</p>
             </motion.div>
           )}
 
           {uploadState === 'success' && (
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: 'spring', stiffness: 200 }} className="text-center py-9">
-              <div className="w-[72px] h-[72px] mx-auto rounded-2xl flex items-center justify-center mb-5 shadow-lg" style={{ background: B1 }}>
+              transition={{ type: 'spring', stiffness: 200 }}
+              className="text-center py-8">
+              <div className="w-18 h-18 mx-auto rounded-2xl flex items-center justify-center mb-5 shadow-xl" style={{ background: HERO_GRAD, width: 72, height: 72 }}>
                 <CheckCircle className="w-10 h-10 text-white" />
               </div>
-              <p className="font-extrabold text-xl mb-1" style={{ color: '#0E1942' }}>Payment Verified!</p>
-              <p className="text-sm font-semibold" style={{ color: B1 }}>Redirecting to Telegram...</p>
+              <p className="font-bold text-xl mb-1 text-gray-900">Payment Verified!</p>
+              <p className="text-sm font-medium" style={{ color: B1 }}>Redirecting to Telegram...</p>
             </motion.div>
           )}
         </div>
