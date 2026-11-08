@@ -1301,6 +1301,14 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
 
   const [uploadState, setUploadState] = useState<UploadState>('idle');
   const [tab, setTab] = useState<'qr' | 'upi'>('qr');
+  // A compact one-minute countdown, without implying the payment price expires.
+  const [secondsLeft, setSecondsLeft] = useState(60);
+  useEffect(() => {
+    if (uploadState !== 'idle' || secondsLeft === 0) return;
+    const id = window.setTimeout(() => setSecondsLeft(value => Math.max(0, value - 1)), 1000);
+    return () => window.clearTimeout(id);
+  }, [secondsLeft, uploadState]);
+  const countdown = `${String(Math.floor(secondsLeft / 60)).padStart(2, '0')}:${String(secondsLeft % 60).padStart(2, '0')}`;
 
   const compressImage = (file: File): Promise<string> =>
     new Promise(resolve => {
@@ -1353,7 +1361,7 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="relative w-full max-w-md rounded-3xl shadow-2xl overflow-hidden bg-white">
+        className="relative w-full max-w-md max-h-[92dvh] overflow-y-auto rounded-3xl shadow-2xl bg-white">
         {uploadState === 'idle' && (
           <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full z-20 hover:bg-gray-100 transition-colors">
             <X className="w-4 h-4 text-gray-400" />
@@ -1362,15 +1370,14 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
 
         {/* Header */}
         <div className="px-4 pt-4 pb-3 flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center shadow-md" style={{ background: HERO_GRAD }}>
-            <img src={datespotLogo} alt="Datespot" className="w-5 h-5 object-contain brightness-0 invert" />
-          </div>
+          <img src="/datespot-payment-logo.webp" alt="Datespot logo"
+            className="w-10 h-10 rounded-xl shrink-0 object-cover" />
           <div className="flex-1 min-w-0">
             <div className="font-bold text-sm leading-none text-gray-900">Join Datespot</div>
             <div className="text-[10px] mt-0.5 font-medium text-gray-400">Lifetime access · Telegram</div>
           </div>
-          <div className="text-right shrink-0">
-            {ORIGINAL_AMT && <div className="text-xs line-through text-gray-400">₹{ORIGINAL_AMT}</div>}
+          <div className="text-right shrink-0 mr-7">
+            {ORIGINAL_AMT && <div className="text-[11px] line-through text-gray-400">₹{ORIGINAL_AMT}</div>}
             <div className="font-extrabold text-2xl leading-none" style={{ color: B1 }}>₹{AMOUNT}</div>
           </div>
         </div>
@@ -1379,15 +1386,20 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
           {uploadState === 'idle' && (
             <>
               {/* Discount badge */}
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl mb-3" style={{ background: `${B1}10`, border: `1px solid ${B1}30` }}>
-                <Sparkles className="w-3.5 h-3.5 shrink-0" style={{ color: B1 }} />
-                <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: B1 }}>Diwali Biggest Sale</p>
+              <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl mb-3" style={{ background: '#EEF2FF', border: '1px solid #D6DFFF' }}>
+                <div className="flex items-center gap-2 min-w-0">
+                  <Sparkles className="w-3.5 h-3.5 shrink-0" style={{ color: B1 }} />
+                  <p className="text-[10px] font-black uppercase tracking-wide" style={{ color: B1 }}>Diwali Biggest Sale</p>
+                </div>
+                <span aria-label={`Countdown ${countdown}`} role="timer"
+                  className="text-[12px] font-extrabold tabular-nums rounded-md px-2 py-1 shrink-0"
+                  style={{ background: '#FFFFFF', border: '1px solid #D6DFFF', color: '#CF2937' }}>{countdown}</span>
               </div>
-              <div className="flex rounded-xl p-0.5 mb-3" style={{ background: `${B1}0A` }}>
+              <div className="flex rounded-xl p-1 mb-3" style={{ background: '#F1F4FA' }}>
                 {(['qr', 'upi'] as const).map(t => (
                   <button key={t} onClick={() => setTab(t)}
                     className="flex-1 py-2 rounded-xl text-xs font-bold transition-all"
-                    style={tab === t ? { background: 'white', color: B1, boxShadow: '0 1px 6px rgba(0,0,0,0.08)' } : { color: '#9CA3AF' }}>
+                    style={tab === t ? { background: B1, color: '#FFFFFF' } : { background: 'transparent', color: '#64748B' }}>
                     {t === 'qr' ? 'Scan QR' : 'UPI ID'}
                   </button>
                 ))}
@@ -1396,14 +1408,14 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
               <AnimatePresence mode="wait">
                 {tab === 'qr' ? (
                   <motion.div key="qr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <div className="rounded-2xl p-3 mb-2 flex items-center justify-center" style={{ background: `${B1}06` }}>
+                    <div className="rounded-2xl p-3 mb-2 flex items-center justify-center" style={{ background: '#F8FAFC' }}>
                       <QRCodeSVG value={upiUrl} size={148} level="H" />
                     </div>
                     <p className="text-center text-[10px] mb-2 font-medium" style={{ color: "#475569" }}>Scan with any UPI app</p>
                   </motion.div>
                 ) : (
                   <motion.div key="upi" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-3">
-                    <div className="rounded-2xl p-4 mb-2" style={{ background: `${B1}06` }}>
+                    <div className="rounded-2xl p-4 mb-2" style={{ background: '#F8FAFC' }}>
                       <p className="text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "#475569" }}>UPI ID</p>
                       <p className="font-mono text-sm font-bold break-all mb-4 text-gray-800">{UPI_ID}</p>
                       <div className="flex gap-2">
@@ -1425,7 +1437,7 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
               </AnimatePresence>
 
               {/* UPI apps accepted: reference image */}
-              <div className="rounded-lg px-2 py-1 mb-2 max-w-[240px] mx-auto" style={{ background: '#FFFFFF', border: '1px solid rgba(25,68,241,0.12)' }}>
+              <div className="rounded-lg px-2 py-1 mb-2 max-w-[220px] mx-auto" style={{ background: '#FFFFFF', border: '1px solid #E2E8F0' }}>
                 <img
                   src="/upi-apps-accepted.webp"
                   alt="UPI, Paytm, Google Pay and PhonePe accepted"
@@ -1439,7 +1451,7 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
                 <input type="file" id="ss-upload" className="hidden" accept="image/*" onChange={handleFileChange} />
                 <label htmlFor="ss-upload"
                   className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl text-white font-bold text-sm cursor-pointer active:scale-95 transition-transform"
-                  style={{ background: HERO_GRAD, boxShadow: `0 6px 20px ${B1}35` }}>
+                  style={{ background: B1 }}>
                   <Upload className="w-4 h-4" /> Upload Screenshot
                 </label>
               </div>
