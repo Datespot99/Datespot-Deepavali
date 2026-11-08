@@ -274,6 +274,13 @@ function LeadModal({ onClose, onComplete, gate = false }: { onClose?: () => void
   const [phone, setPhone]     = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
+  const [galleryIndex, setGalleryIndex] = useState(0);
+
+  // Cycle every photo through the desktop background cards.
+  useEffect(() => {
+    const timer = window.setInterval(() => setGalleryIndex(i => (i + 1) % 10), 3000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -296,11 +303,22 @@ function LeadModal({ onClose, onComplete, gate = false }: { onClose?: () => void
   };
 
   const portraits = [
-    { pos: '0%', side: 'left', near: false },
-    { pos: '33.333%', side: 'left', near: true },
-    { pos: '66.667%', side: 'right', near: true },
-    { pos: '100%', side: 'right', near: false },
+    { side: 'left', near: false },
+    { side: 'left', near: true },
+    { side: 'right', near: true },
+    { side: 'right', near: false },
   ] as const;
+
+  // Ten original photos are arranged as a 5-column × 2-row WebP sprite.
+  // Each photo has 240 × 320 pixels, replacing the old tiny four-photo image.
+  const photoStyle = (imageIndex: number): React.CSSProperties => ({
+    backgroundImage: "url('/signup-gallery.webp')",
+    backgroundSize: '500% 200%',
+    backgroundPosition: `${(imageIndex % 5) * 25}% ${Math.floor(imageIndex / 5) * 100}%`,
+    backgroundRepeat: 'no-repeat',
+  });
+
+  const photoIndexes = Array.from({ length: 10 }, (_, index) => index);
 
   return (
     <div className={`fixed inset-0 z-[999] flex items-center justify-center overflow-y-auto overflow-x-hidden px-4 py-3 sm:px-5 ${gate ? '' : 'bg-black/70'}`}
@@ -312,7 +330,7 @@ function LeadModal({ onClose, onComplete, gate = false }: { onClose?: () => void
       }}>
       <motion.div className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={gate ? undefined : onClose} />
 
-      {/* Atmospheric portraits sit behind, never over, the form. */}
+      {/* Desktop: angled background portraits rotate through all ten images. */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden hidden sm:block" aria-hidden="true">
         {portraits.map((photo, i) => (
           <div key={i}
@@ -326,36 +344,51 @@ function LeadModal({ onClose, onComplete, gate = false }: { onClose?: () => void
               transform: `rotate(${photo.side === 'left' ? (photo.near ? -11 : -17) : (photo.near ? 11 : 17)}deg)`,
               border: '1px solid rgba(77,94,241,.55)',
               boxShadow: '0 8px 35px rgba(13,33,127,.22)',
-              opacity: 0.50,
-              backgroundImage: "linear-gradient(rgba(3,7,20,.25),rgba(3,7,20,.25)),url('/signup-portraits.webp')",
-              backgroundSize: '100% 100%, 400% 100%',
-              backgroundPosition: `center, ${photo.pos} center`,
-              backgroundRepeat: 'no-repeat',
-            }}
-          />
+              backgroundColor: '#071027',
+            }}>
+            <AnimatePresence mode="wait">
+              <motion.div key={(galleryIndex + i * 2) % 10}
+                initial={{ opacity: 0 }} animate={{ opacity: .75 }} exit={{ opacity: 0 }}
+                transition={{ duration: .6 }}
+                className="absolute inset-0"
+                style={photoStyle((galleryIndex + i * 2) % 10)} />
+            </AnimatePresence>
+          </div>
         ))}
       </div>
+      <style>{`
+        @keyframes datespotPhotoLoop {
+          from { transform: translate3d(0, 0, 0); }
+          to { transform: translate3d(-50%, 0, 0); }
+        }
+        .datespot-photo-loop { animation: datespotPhotoLoop 42s linear infinite; will-change: transform; }
+        @media (prefers-reduced-motion: reduce) { .datespot-photo-loop { animation: none; } }
+      `}</style>
 
       <div className="relative z-10 w-full max-w-[440px] max-h-[96dvh] overflow-y-auto sm:max-h-none sm:overflow-visible flex flex-col items-center gap-3 sm:block">
-        {/* Mobile: show the photos clearly above the form rather than hiding them behind it. */}
-        <div className="sm:hidden flex items-center justify-center gap-1.5 w-full h-[114px] shrink-0 pointer-events-none" aria-hidden="true">
-          {portraits.map((photo, i) => (
-            <div key={i} className="rounded-xl shrink-0"
-              style={{
-                width: i === 1 || i === 2 ? '24%' : '21%',
-                height: i === 1 || i === 2 ? 108 : 92,
-                transform: `rotate(${[-8,-3,3,8][i]}deg)`,
-                border: '1px solid rgba(78,106,255,.65)',
-                boxShadow: '0 8px 24px rgba(0,0,0,.3)',
-                opacity: .72,
-                backgroundImage: "linear-gradient(rgba(3,7,20,.14),rgba(3,7,20,.14)),url('/signup-portraits.webp')",
-                backgroundSize: '100% 100%,400% 100%',
-                backgroundPosition: `center,${photo.pos} center`,
-                backgroundRepeat: 'no-repeat',
-              }}
-            />
-          ))}
+        {/* Mobile: the full ten-photo gallery scrolls seamlessly on an infinite loop. */}
+        <div className="sm:hidden w-full h-[136px] shrink-0 overflow-hidden pointer-events-none" aria-hidden="true"
+          style={{ WebkitMaskImage: 'linear-gradient(90deg, transparent, black 7%, black 93%, transparent)',
+            maskImage: 'linear-gradient(90deg, transparent, black 7%, black 93%, transparent)' }}>
+          <div className="datespot-photo-loop inline-flex w-max h-full items-center">
+            {[0, 1].map(repeat => (
+              <div key={repeat} className="flex shrink-0 h-full items-center gap-2 pr-2">
+                {photoIndexes.map(i => (
+                  <div key={i} className="shrink-0 rounded-xl"
+                    style={{
+                      width: 'clamp(74px,20vw,92px)',
+                      height: 'clamp(99px,26.67vw,123px)',
+                      transform: `rotate(${[-5, -2, 2, 5, -3, 3, -4, 4, -2, 2][i]}deg)`,
+                      border: '1px solid rgba(78,106,255,.65)',
+                      boxShadow: '0 7px 20px rgba(0,0,0,.28)',
+                      ...photoStyle(i),
+                    }} />
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
+
       <motion.div
         initial={{ opacity: 0, y: 22, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
