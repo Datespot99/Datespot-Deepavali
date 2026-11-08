@@ -31,6 +31,14 @@ const B2        = '#0F2DBB';
 const ACCENT    = '#FFD700';
 const HERO_GRAD = B1;
 
+// Separate desktop and mobile prices; UPI requests use the matching amount.
+const PRICING = {
+  desktop: { amount: '1999', original: '3999' },
+  mobile:  { amount: '999', original: '1999' },
+} as const;
+type PricingDevice = keyof typeof PRICING;
+const formatPrice = (value: string) => `₹${Number(value).toLocaleString('en-IN')}`;
+
 // ─── Theme system ─────────────────────────────────────────────────────────────
 const DARK_THEME = {
   PAGE_BG:  '#000000',
@@ -114,7 +122,7 @@ const REVIEWS = [
   { name: 'Aditya P.',      area: 'Whitefield',   text: "Was skeptical at first but it's 100% worth it. The voice call feature is a great way to vibe before meeting." },
   { name: 'Rohan Gowda.',   area: 'JP Nagar',     text: 'Already arranged a meet within my first week. Active group, daily new faces. Super recommend bro.' },
   { name: 'Suresh Naik.',   area: 'Marathahalli', text: 'Met my current girlfriend here lol. Very organised, zero spam and the admin actually screens people.' },
-  { name: 'Arjun K.',       area: 'Jayanagar',    text: 'Best ₹399 I have spent this year honestly. The group is always active, quality women from Bangalore.' },
+  { name: 'Arjun K.',       area: 'Jayanagar',    text: 'The group is always active, quality women from Bangalore.' },
   { name: 'Dev Menon.',     area: 'BTM Layout',   text: 'Three meets in two months. The vibe here is very different from regular apps — feels real and personal.' },
   { name: 'Sagar R.',       area: 'Electronic City', text: 'Legit group. Admin does proper verification so you know everyone is genuine. No nonsense.' },
   { name: 'Nikhil T.',      area: 'Yelahanka',    text: 'Joined on a friend\'s suggestion and I\'m glad I did. Active daily, good conversations and easy to arrange meets.' },
@@ -515,58 +523,6 @@ function ReviewsStrip() {
 
 function ReviewsSlideshow() { return null; }
 
-// ─── Urgency Banner ───────────────────────────────────────────────────────────
-const CYCLE_SECS = 6 * 3600; // 6-hour looping countdown
-
-function UrgencyBanner() {
-  const T = useT();
-  const getRemaining = () => {
-    const now = Math.floor(Date.now() / 1000);
-    const cycleStart = Math.floor(now / CYCLE_SECS) * CYCLE_SECS;
-    return CYCLE_SECS - (now - cycleStart);
-  };
-  const [time, setTime] = useState(getRemaining);
-  useEffect(() => {
-    const t = setInterval(() => setTime(getRemaining()), 1000);
-    return () => clearInterval(t);
-  }, []);
-  const h = String(Math.floor(time / 3600)).padStart(2, '0');
-  const m = String(Math.floor((time % 3600) / 60)).padStart(2, '0');
-  const s = String(time % 60).padStart(2, '0');
-  const pct = ((CYCLE_SECS - time) / CYCLE_SECS) * 100;
-
-  return (
-    <div className="w-full relative overflow-hidden" style={{ background: T.isDark ? '#000000' : '#EEF0FF', borderBottom: `1px solid ${B1}30` }}>
-      {/* Animated progress bar */}
-      <div className="absolute bottom-0 left-0 h-[2px] transition-all duration-1000"
-        style={{ width: `${100 - pct}%`, background: HERO_GRAD }} />
-      <div className="flex items-center justify-between px-4 py-2.5">
-        <div className="flex items-center gap-2">
-          <motion.div
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}>
-            <Zap className="w-3 h-3" style={{ color: ACCENT }} />
-          </motion.div>
-          <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: T.DARK }}>
-            Flash Sale · Ends in
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          {[h, m, s].map((unit, i) => (
-            <React.Fragment key={i}>
-              <div className="flex flex-col items-center px-1.5 py-0.5 rounded-md"
-                style={{ background: `${B1}25`, minWidth: 28 }}>
-                <span className="font-black text-xs tabular-nums leading-none" style={{ color: T.DARK }}>{unit}</span>
-              </div>
-              {i < 2 && <span className="font-black text-xs" style={{ color: T.MUTED }}>:</span>}
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Animated Stats ───────────────────────────────────────────────────────────
 function useCountUp(target: number, duration = 1600) {
   const [val, setVal] = useState(0);
@@ -615,7 +571,7 @@ function StatsSection() {
 function HowItWorks({ onJoin }: { onJoin: () => void }) {
   const T = useT();
   const steps = [
-    { icon: CreditCard, label: 'Pay Entry Fee', desc: 'One-time ₹399 payment via UPI', c1: B1, c2: '#FF6B35' },
+    { icon: CreditCard, label: 'Pay Entry Fee', desc: `One-time ${formatPrice(PRICING.mobile.amount)} payment via UPI`, c1: B1, c2: '#FF6B35' },
     { icon: Send,       label: 'Join Datespot', desc: 'Receive the Telegram group link instantly', c1: '#10B981', c2: '#34D399' },
     { icon: Heart,      label: 'Start Dating',  desc: 'Chat, call & meet verified women', c1: '#EC4899', c2: '#F97316' },
   ];
@@ -785,7 +741,7 @@ function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
   const items = [
     { q: 'Is this genuine?', a: 'Yes. Datespot has been running since 2021 with 548+ verified members. Every member is manually approved by Subhash Gowda before getting access.' },
-    { q: 'How do I get access?', a: 'Pay ₹399 via UPI, upload the payment screenshot, and you receive the Telegram group link instantly. The whole process takes under 2 minutes.' },
+    { q: 'How do I get access?', a: `Pay ${formatPrice(PRICING.mobile.amount)} via UPI, upload the payment screenshot, and you receive the Telegram group link instantly. The whole process takes under 2 minutes.` },
     { q: 'Are profiles verified?', a: 'Every profile is manually verified by the admin. Fake profiles, bots, and spam accounts are removed immediately — zero tolerance policy.' },
     { q: 'Is my privacy protected?', a: 'Absolutely. Your personal details are never shared with other members. The group has strict privacy rules and all screenshots of members are prohibited.' },
     { q: 'How quickly do I receive access?', a: 'Access is sent within minutes of payment confirmation, typically under 5 minutes. Admin support is available daily for any delays.' },
@@ -824,8 +780,8 @@ function StickyCTA({ onJoin }: { onJoin: () => void }) {
               style={{ background: 'rgba(255,255,255,0.14)', width: '60%' }} />
             <div className="relative flex items-center justify-center gap-3 py-3.5 px-6">
               <span className="font-black text-white text-sm tracking-tight">Join Datespot</span>
-              <span className="text-white/75 text-[11px] line-through font-semibold">₹999</span>
-              <span className="font-black text-white text-sm">₹399</span>
+              <span className="text-white/75 text-[11px] line-through font-semibold">{formatPrice(PRICING.mobile.original)}</span>
+              <span className="font-black text-white text-sm">{formatPrice(PRICING.mobile.amount)}</span>
               <ArrowRight className="w-4 h-4 text-white" />
             </div>
           </motion.button>
@@ -859,7 +815,6 @@ function MobileApp() {
       <ThemeToggle />
 
       {/* Urgency Banner */}
-      <UrgencyBanner />
 
       {/* Main Content */}
       <div className="max-w-md mx-auto px-4">
@@ -876,18 +831,11 @@ function MobileApp() {
             <div className="h-[3px]" style={{ background: HERO_GRAD }} />
             <div className="px-5 py-5 flex flex-col items-center text-center gap-4">
 
-              {/* Discount tag */}
-              <DiwaliOrnaments />
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                style={{ background: `${B1}14`, border: `1px solid ${B1}45` }}>
-                <Sparkles className="w-2.5 h-2.5" style={{ color: B1 }} />
-                <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: B1 }}>Diwali Biggest Sale</span>
-              </div>
 
               {/* Price */}
               <div className="flex items-baseline gap-2 justify-center">
-                <span className="text-sm line-through font-semibold" style={{ color: T.MUTED }}>₹999</span>
-                <span className="font-black text-4xl leading-none" style={{ color: B1 }}>₹399</span>
+                <span className="text-sm line-through font-semibold" style={{ color: T.MUTED }}>{formatPrice(PRICING.mobile.original)}</span>
+                <span className="font-black text-4xl leading-none" style={{ color: B1 }}>{formatPrice(PRICING.mobile.amount)}</span>
               </div>
 
               {/* CTA Button */}
@@ -965,7 +913,7 @@ function MobileApp() {
 
       <AnimatePresence>
         {showLead    && <LeadModal onClose={() => setShowLead(false)} onComplete={() => { setShowLead(false); setShowPayment(true); }} />}
-        {showPayment && <PaymentModal onClose={() => setShowPayment(false)} paymentType={paymentType} />}
+        {showPayment && <PaymentModal onClose={() => setShowPayment(false)} paymentType={paymentType} device="mobile" />}
         {showChat    && <ChatOverlay onClose={() => setShowChat(false)} onOpenPayment={() => handleJoin('full')} />}
       </AnimatePresence>
 
@@ -1180,10 +1128,10 @@ function DesktopFAQ() {
   const [open, setOpen] = useState<number | null>(0);
   const items = [
     { q: 'Is Datespot genuine?', a: 'Datespot is a Bangalore-based Telegram community. The community has guidelines and an admin-led onboarding process.' },
-    { q: 'How do I get access?', a: 'Enter your details, make the ₹399 UPI payment and upload your payment screenshot to continue to the Telegram invitation.' },
+    { q: 'How do I get access?', a: `Enter your details, make the ${formatPrice(PRICING.desktop.amount)} UPI payment and upload your payment screenshot to continue to the Telegram invitation.` },
     { q: 'What is included in membership?', a: 'Membership includes the group chat, voice calls, opportunities for direct meets and exclusive 18+ content.' },
     { q: 'Can I use any UPI app?', a: 'You can scan the QR code or use the UPI ID shown on the payment screen with a compatible UPI app.' },
-    { q: 'Is it a one-time fee?', a: 'Yes. The current joining price is ₹399, reduced from the displayed original price of ₹999, for lifetime access.' },
+    { q: 'Is it a one-time fee?', a: `Yes. The current joining price is ${formatPrice(PRICING.desktop.amount)} (original price ${formatPrice(PRICING.desktop.original)}) for lifetime access.` },
   ];
   return (
     <div>
@@ -1227,24 +1175,17 @@ function DesktopVersion({ onOpenPayment, showPayment, onClosePayment, paymentTyp
   return (
     <div className="min-h-screen w-full relative" style={{ ...dotGridStyle(T), fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <ThemeToggle />
-      <UrgencyBanner />
       <DesktopHero />
 
-      {/* Integrated sale CTA: no separate card or boxed background. */}
+      {/* Desktop-only join CTA, with no sale or discount promotion. */}
       <section className="relative max-w-7xl mx-auto px-8 pt-10 pb-16 text-center isolate">
         <div aria-hidden="true" className="pointer-events-none absolute -z-10 rounded-[50%]"
           style={{ width: '92%', height: 230, left: '4%', top: 115,
             background: T.isDark ? 'rgba(25,68,241,.075)' : 'rgba(25,68,241,.045)' }} />
-        <div className="mb-3"><DiwaliOrnaments /></div>
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4"
-          style={{ background: T.isDark ? 'rgba(25,68,241,.16)' : '#E9EEFF', color: B1 }}>
-          <Sparkles className="w-3.5 h-3.5" />
-          <span className="text-xs font-black uppercase tracking-widest">Diwali Biggest Sale</span>
-        </div>
         <h2 className="font-black text-4xl mb-2" style={{ color: T.DARK, letterSpacing: '-0.04em' }}>Ready to Join?</h2>
         <div className="flex items-baseline gap-3 justify-center mb-5">
-          <span className="text-lg line-through font-semibold" style={{ color: T.MUTED }}>₹999</span>
-          <span className="font-black text-5xl leading-none" style={{ color: B1 }}>₹399</span>
+          <span className="text-lg line-through font-semibold" style={{ color: T.MUTED }}>{formatPrice(PRICING.desktop.original)}</span>
+          <span className="font-black text-5xl leading-none" style={{ color: B1 }}>{formatPrice(PRICING.desktop.amount)}</span>
         </div>
         <button type="button" onClick={() => onOpenPayment('full')}
           className="w-full max-w-[360px] rounded-2xl font-extrabold text-white text-base inline-flex items-center justify-center gap-3 px-10 py-4 transition-transform hover:scale-[1.02] active:scale-[.98]"
@@ -1348,7 +1289,7 @@ function DesktopVersion({ onOpenPayment, showPayment, onClosePayment, paymentTyp
       </footer>
 
       <AnimatePresence>
-        {showPayment && <PaymentModal onClose={onClosePayment} paymentType={paymentType} />}
+        {showPayment && <PaymentModal onClose={onClosePayment} paymentType={paymentType} device="desktop" />}
       </AnimatePresence>
       <Toaster position="top-center" toastOptions={{
         style: { background: T.CARD_BG, color: T.DARK, borderRadius: '14px', fontSize: '14px', fontWeight: '700', border: `1px solid ${B1}30`, boxShadow: `0 8px 24px ${B1}40` },
@@ -1418,7 +1359,7 @@ function ChatOverlay({ onClose, onOpenPayment }: { onClose: () => void; onOpenPa
                   <button onClick={() => { toast.success('Opening payment...'); onClose(); setTimeout(() => onOpenPayment(), 300); }}
                     className="px-5 py-2.5 rounded-2xl text-white font-bold text-xs active:scale-95 transition-transform shadow-md"
                     style={{ background: HERO_GRAD }}>
-                    Join for ₹399
+                    Join for {formatPrice(PRICING.mobile.amount)}
                   </button>
                 ) : (
                   <div className="px-3.5 py-2.5 text-xs shadow-sm"
@@ -1521,10 +1462,9 @@ function VoiceMessageBubble({ audioSrc, isUser }: { audioSrc?: string; isUser?: 
 // ─── Payment Modal ────────────────────────────────────────────────────────────
 type UploadState = 'idle' | 'verifying' | 'success';
 
-function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentType: 'full' | 'demo' }) {
+function PaymentModal({ onClose, paymentType, device }: { onClose: () => void; paymentType: 'full' | 'demo'; device: PricingDevice }) {
   const UPI_ID        = 'BHARATPE2R0S0C1D6V46619@unitype';
-  const AMOUNT        = '399';
-  const ORIGINAL_AMT  = '999';
+  const { amount: AMOUNT, original: ORIGINAL_AMT } = PRICING[device];
   const TELEGRAM_LINK = 'https://t.me/+wRAGkbTVLLA0YzQ1';
   const upiUrl        = `upi://pay?pa=${UPI_ID}&pn=Datespot&am=${AMOUNT}&cu=INR`;
 
@@ -1606,23 +1546,23 @@ function PaymentModal({ onClose, paymentType }: { onClose: () => void; paymentTy
             <div className="text-[10px] mt-0.5 font-medium text-gray-400">Lifetime access · Telegram</div>
           </div>
           <div className="text-right shrink-0 mr-7">
-            {ORIGINAL_AMT && <div className="text-[11px] line-through text-gray-400">₹{ORIGINAL_AMT}</div>}
-            <div className="font-extrabold text-2xl leading-none" style={{ color: B1 }}>₹{AMOUNT}</div>
+            {ORIGINAL_AMT && <div className="text-[11px] line-through text-gray-400">{formatPrice(ORIGINAL_AMT)}</div>}
+            <div className="font-extrabold text-2xl leading-none" style={{ color: B1 }}>{formatPrice(AMOUNT)}</div>
           </div>
         </div>
 
         <div className="px-4 pb-4">
           {uploadState === 'idle' && (
             <>
-              {/* Discount badge */}
+              {/* Neutral payment details; no discount or sale expiry claims. */}
               <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl mb-3" style={{ background: '#EEF2FF', border: '1px solid #D6DFFF' }}>
                 <div className="flex items-center gap-2 min-w-0">
-                  <Sparkles className="w-3.5 h-3.5 shrink-0" style={{ color: B1 }} />
-                  <p className="text-[10px] font-black uppercase tracking-wide" style={{ color: B1 }}>Diwali Biggest Sale</p>
+                  <CreditCard className="w-3.5 h-3.5 shrink-0" style={{ color: B1 }} />
+                  <p className="text-[10px] font-black uppercase tracking-wide" style={{ color: B1 }}>Secure UPI Payment</p>
                 </div>
                 <span aria-label={`Countdown ${countdown}`} role="timer"
                   className="text-[12px] font-extrabold tabular-nums rounded-md px-2 py-1 shrink-0"
-                  style={{ background: '#FFFFFF', border: '1px solid #D6DFFF', color: '#CF2937' }}>{countdown}</span>
+                  style={{ background: '#FFFFFF', border: '1px solid #D6DFFF', color: '#475569' }}>{countdown}</span>
               </div>
               <div className="flex rounded-xl p-1 mb-3" style={{ background: '#F1F4FA' }}>
                 {(['qr', 'upi'] as const).map(t => (
