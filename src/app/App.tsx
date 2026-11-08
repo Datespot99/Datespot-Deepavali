@@ -1034,8 +1034,16 @@ function DesktopWrapper() {
 
 
 /* Desktop-only hero. The mobile screen is rendered by MobileApp and is not affected. */
-function DesktopHero({ onJoin }: { onJoin: () => void }) {
+function DesktopHero() {
   const T = useT();
+  const [previewIndex, setPreviewIndex] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => setPreviewIndex(index => (index + 1) % IMAGES.length), 2800);
+    return () => window.clearInterval(timer);
+  }, []);
+  const changePreview = (offset: number) =>
+    setPreviewIndex(index => (index + offset + IMAGES.length) % IMAGES.length);
+
   return (
     <section className="max-w-6xl mx-auto px-8 pt-14 pb-12">
       <div className="grid md:grid-cols-2 gap-10 items-center">
@@ -1060,27 +1068,51 @@ function DesktopHero({ onJoin }: { onJoin: () => void }) {
           </div>
         </div>
 
-        <div className="relative rounded-3xl overflow-hidden p-8 xl:p-10"
-          style={{ background: T.CARD_BG, border: '1px solid ' + B1 + '55', boxShadow: T.isDark ? '0 14px 45px rgba(0,0,0,0.28)' : '0 12px 36px rgba(25,68,241,0.09)' }}>
-          <div className="absolute top-0 left-0 w-full h-1" style={{ background: B1 }} />
-          <div className="flex items-center gap-2 mb-5">
-            <Sparkles className="w-4 h-4" style={{ color: B1 }} />
-            <span className="text-xs font-black uppercase tracking-widest" style={{ color: B1 }}>Diwali Biggest Sale</span>
+        {/* Same preview content and photo-swiping feel as the mobile Group Preview. */}
+        <div className="rounded-3xl p-5 lg:p-6"
+          style={{ background: T.CARD_BG, border: '1px solid ' + B1 + '40', boxShadow: T.isDark ? '0 14px 45px rgba(0,0,0,0.28)' : '0 12px 36px rgba(25,68,241,0.09)' }}>
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-xl font-extrabold mb-1" style={{ color: T.DARK }}>Group Preview</h2>
+              <p className="text-xs font-semibold" style={{ color: T.MUTED }}>See what's inside the group</p>
+            </div>
+            <span className="shrink-0 text-xs font-extrabold rounded-full px-3 py-1.5 text-white tabular-nums" style={{ background: B1 }}>
+              {previewIndex + 1} / {IMAGES.length}
+            </span>
           </div>
-          <h2 className="text-2xl font-extrabold mb-1" style={{ color: T.DARK }}>Join Datespot</h2>
-          <p className="text-sm mb-6" style={{ color: T.MUTED }}>One-time payment · Lifetime Telegram access</p>
-          <div className="flex items-baseline gap-3 mb-7">
-            <span className="line-through text-xl font-bold" style={{ color: T.MUTED }}>₹999</span>
-            <strong className="font-black text-5xl" style={{ color: B1 }}>₹399</strong>
+          <div className="relative flex items-center justify-center gap-4">
+            <button type="button" onClick={() => changePreview(-1)} aria-label="Previous group preview"
+              className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-lg font-bold transition-opacity hover:opacity-75"
+              style={{ color: B1, border: '1px solid ' + B1 + '55', background: T.CARD_BG }}>
+              ‹
+            </button>
+            <div className="relative w-[205px] xl:w-[220px] shrink-0">
+              <div className="absolute inset-0 rounded-3xl blur-xl opacity-20" style={{ background: B1 }} />
+              <div className="relative w-full aspect-[9/16] overflow-hidden rounded-3xl"
+                style={{ background: '#0B1125', border: '2px solid ' + B1 + '44', boxShadow: '0 12px 25px rgba(0,0,0,0.16)' }}>
+                <AnimatePresence mode="wait">
+                  <motion.img key={previewIndex} src={IMAGES[previewIndex]} alt={`Group preview screenshot ${previewIndex + 1}`}
+                    initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -18 }}
+                    transition={{ duration: 0.28 }}
+                    className="absolute inset-0 w-full h-full object-cover" />
+                </AnimatePresence>
+                <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5">
+                  {IMAGES.map((_, i) => (
+                    <button key={i} type="button" onClick={() => setPreviewIndex(i)}
+                      aria-label={`Show group preview ${i + 1}`} aria-current={i === previewIndex ? 'true' : undefined}
+                      className="rounded-full transition-all"
+                      style={{ width: i === previewIndex ? 18 : 6, height: 6,
+                        background: i === previewIndex ? '#FFFFFF' : 'rgba(255,255,255,0.6)' }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <button type="button" onClick={() => changePreview(1)} aria-label="Next group preview"
+              className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-lg font-bold transition-opacity hover:opacity-75"
+              style={{ color: B1, border: '1px solid ' + B1 + '55', background: T.CARD_BG }}>
+              ›
+            </button>
           </div>
-          <button type="button" onClick={onJoin}
-            className="w-full rounded-2xl flex items-center justify-center gap-3 text-white font-extrabold text-base py-4 transition-transform hover:scale-[1.02] active:scale-[0.98]"
-            style={{ background: B1 }}>
-            Join Datespot Now <ArrowRight className="w-5 h-5" />
-          </button>
-          <p className="text-xs font-medium text-center mt-4" style={{ color: T.MUTED }}>
-            Pay securely using your preferred UPI app
-          </p>
         </div>
       </div>
     </section>
@@ -1141,7 +1173,7 @@ function DesktopVersion({ onOpenPayment, showPayment, onClosePayment, paymentTyp
     <div className="min-h-screen w-full relative" style={{ ...dotGridStyle(T), fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <ThemeToggle />
       <UrgencyBanner />
-      <DesktopHero onJoin={() => onOpenPayment('full')} />
+      <DesktopHero />
 
       {/* Stats */}
       <section className="max-w-5xl mx-auto px-8 py-12">
@@ -1207,11 +1239,6 @@ function DesktopVersion({ onOpenPayment, showPayment, onClosePayment, paymentTyp
           })}
         </div>
       </section>
-
-      {/* Gallery */}
-      <div style={{ background: T.CARD_BG, borderRadius: '3rem', margin: '0 2rem 4rem', border: `1px solid ${T.BORDER}` }}>
-        <GroupPreviewSlider images={IMAGES} />
-      </div>
 
       {/* Admin + Why Trust side by side */}
       <section className="max-w-5xl mx-auto px-8 pb-12 grid grid-cols-2 gap-8">
