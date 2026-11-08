@@ -1032,6 +1032,102 @@ function DesktopWrapper() {
   );
 }
 
+
+/* Desktop-only hero. The mobile screen is rendered by MobileApp and is not affected. */
+function DesktopHero({ onJoin }: { onJoin: () => void }) {
+  const T = useT();
+  return (
+    <section className="max-w-6xl mx-auto px-8 pt-14 pb-12">
+      <div className="grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <span className="inline-flex items-center rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-widest mb-6"
+            style={{ color: B1, background: T.CARD_BG, border: '1px solid ' + B1 + '44' }}>
+            Datespot · Bangalore
+          </span>
+          <h1 className="font-black leading-[1.12] mb-6" style={{ color: T.DARK, fontSize: 'clamp(38px,4vw,56px)', letterSpacing: '-0.05em' }}>
+            Meet people. <span style={{ color: B1 }}>Make connections.</span>
+          </h1>
+          <p className="text-lg leading-relaxed max-w-lg mb-7" style={{ color: T.MUTED }}>
+            Discover a Telegram community with group chats, voice calls and opportunities to meet in person.
+          </p>
+          <div className="flex flex-wrap gap-2.5">
+            {['Group chats', 'Voice calls', 'Direct meets'].map((label) => (
+              <span key={label} className="px-4 py-2 rounded-xl text-xs font-bold"
+                style={{ color: T.DARK, background: T.CARD_BG, border: '1px solid ' + T.BORDER }}>
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative rounded-3xl overflow-hidden p-8 xl:p-10"
+          style={{ background: T.CARD_BG, border: '1px solid ' + B1 + '55', boxShadow: T.isDark ? '0 14px 45px rgba(0,0,0,0.28)' : '0 12px 36px rgba(25,68,241,0.09)' }}>
+          <div className="absolute top-0 left-0 w-full h-1" style={{ background: B1 }} />
+          <div className="flex items-center gap-2 mb-5">
+            <Sparkles className="w-4 h-4" style={{ color: B1 }} />
+            <span className="text-xs font-black uppercase tracking-widest" style={{ color: B1 }}>Diwali Biggest Sale</span>
+          </div>
+          <h2 className="text-2xl font-extrabold mb-1" style={{ color: T.DARK }}>Join Datespot</h2>
+          <p className="text-sm mb-6" style={{ color: T.MUTED }}>One-time payment · Lifetime Telegram access</p>
+          <div className="flex items-baseline gap-3 mb-7">
+            <span className="line-through text-xl font-bold" style={{ color: T.MUTED }}>₹999</span>
+            <strong className="font-black text-5xl" style={{ color: B1 }}>₹399</strong>
+          </div>
+          <button type="button" onClick={onJoin}
+            className="w-full rounded-2xl flex items-center justify-center gap-3 text-white font-extrabold text-base py-4 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            style={{ background: B1 }}>
+            Join Datespot Now <ArrowRight className="w-5 h-5" />
+          </button>
+          <p className="text-xs font-medium text-center mt-4" style={{ color: T.MUTED }}>
+            Pay securely using your preferred UPI app
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* Desktop-only FAQ, deliberately separate from the mobile FAQ component. */
+function DesktopFAQ() {
+  const T = useT();
+  const [open, setOpen] = useState<number | null>(0);
+  const items = [
+    { q: 'Is Datespot genuine?', a: 'Datespot is a Bangalore-based Telegram community. The community has guidelines and an admin-led onboarding process.' },
+    { q: 'How do I get access?', a: 'Enter your details, make the ₹399 UPI payment and upload your payment screenshot to continue to the Telegram invitation.' },
+    { q: 'What is included in membership?', a: 'Membership includes the group chat, voice calls, opportunities for direct meets and exclusive 18+ content.' },
+    { q: 'Can I use any UPI app?', a: 'You can scan the QR code or use the UPI ID shown on the payment screen with a compatible UPI app.' },
+    { q: 'Is it a one-time fee?', a: 'Yes. The current joining price is ₹399, reduced from the displayed original price of ₹999, for lifetime access.' },
+  ];
+  return (
+    <div>
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-extrabold mb-2" style={{ color: T.DARK, letterSpacing: '-0.03em' }}>Frequently Asked Questions</h2>
+        <p className="text-base font-medium" style={{ color: T.MUTED }}>Everything you need to know before joining</p>
+      </div>
+      <div className="space-y-3">
+        {items.map((item, i) => (
+          <div key={item.q} className="rounded-2xl overflow-hidden"
+            style={{ background: T.CARD_BG, border: '1px solid ' + (open === i ? B1 + '66' : T.BORDER) }}>
+            <button type="button" className="w-full flex items-center justify-between gap-6 px-6 py-5 text-left"
+              aria-expanded={open === i} aria-controls={'desktop-faq-answer-' + i}
+              onClick={() => setOpen(prev => prev === i ? null : i)}>
+              <span className="font-bold text-base" style={{ color: T.DARK }}>{item.q}</span>
+              <ChevronDown className={'w-5 h-5 shrink-0 transition-transform ' + (open === i ? 'rotate-180' : '')}
+                style={{ color: B1 }} />
+            </button>
+            {open === i && (
+              <div id={'desktop-faq-answer-' + i} className="px-6 pb-5 -mt-1 text-sm leading-relaxed"
+                style={{ color: T.MUTED }}>
+                {item.a}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Desktop Version ──────────────────────────────────────────────────────────
 function DesktopVersion({ onOpenPayment, showPayment, onClosePayment, paymentType }: {
   onOpenPayment: (type: 'full' | 'demo') => void;
@@ -1045,6 +1141,7 @@ function DesktopVersion({ onOpenPayment, showPayment, onClosePayment, paymentTyp
     <div className="min-h-screen w-full relative" style={{ ...dotGridStyle(T), fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <ThemeToggle />
       <UrgencyBanner />
+      <DesktopHero onJoin={() => onOpenPayment('full')} />
 
       {/* Stats */}
       <section className="max-w-5xl mx-auto px-8 py-12">
@@ -1165,7 +1262,7 @@ function DesktopVersion({ onOpenPayment, showPayment, onClosePayment, paymentTyp
 
       {/* FAQ */}
       <section className="max-w-3xl mx-auto px-8 pb-12">
-        <FAQ />
+        <DesktopFAQ />
       </section>
 
       {/* Footer */}
