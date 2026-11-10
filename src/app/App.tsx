@@ -1500,7 +1500,7 @@ function PaymentModal({ onClose, paymentType, device }: { onClose: () => void; p
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadState('verifying');
-    toast.success('Verifying payment...');
+    toast('Uploading screenshot...');
 
     try {
       const base64 = await compressImage(file);
@@ -1513,12 +1513,16 @@ function PaymentModal({ onClose, paymentType, device }: { onClose: () => void; p
         body: JSON.stringify({ action: 'screenshot', name, phone, mimeType: 'image/jpeg', fileName: `payment_${Date.now()}.jpg`, image: base64 }),
       });
     } catch {
-      // no-cors — response is opaque, error means network issue
+      setUploadState('idle');
+      toast.error('Screenshot upload failed. Please try again.');
+      return;
     }
 
+    // Apps Script returns an opaque response in no-cors mode, so this only
+    // confirms that the browser sent the request, not that payment was verified.
     setTimeout(() => {
       setUploadState('success');
-      toast.success('Payment verified! Welcome!');
+      toast.success('Screenshot sent for review.');
       confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: [B1, B2, '#fff', '#FF6B6B'] });
       setTimeout(() => window.open(TELEGRAM_LINK, '_blank'), 1200);
     }, 2500);
@@ -1632,7 +1636,7 @@ function PaymentModal({ onClose, paymentType, device }: { onClose: () => void; p
               <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: `${B1}12` }}>
                 <Loader2 className="w-8 h-8 animate-spin" style={{ color: B1 }} />
               </div>
-              <p className="font-bold text-base mb-1 text-gray-900">Verifying Payment</p>
+              <p className="font-bold text-base mb-1 text-gray-900">Uploading Screenshot</p>
               <p className="text-xs font-medium text-gray-400">Please wait a moment...</p>
             </motion.div>
           )}
@@ -1644,7 +1648,7 @@ function PaymentModal({ onClose, paymentType, device }: { onClose: () => void; p
               <div className="w-18 h-18 mx-auto rounded-2xl flex items-center justify-center mb-5 shadow-xl" style={{ background: HERO_GRAD, width: 72, height: 72 }}>
                 <CheckCircle className="w-10 h-10 text-white" />
               </div>
-              <p className="font-bold text-xl mb-1 text-gray-900">Payment Verified!</p>
+              <p className="font-bold text-xl mb-1 text-gray-900">Screenshot Submitted</p>
               <p className="text-sm font-medium" style={{ color: B1 }}>Redirecting to Telegram...</p>
             </motion.div>
           )}
