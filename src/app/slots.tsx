@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 // Same deployed Apps Script endpoint used by lead and screenshot submissions.
 export const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw7OeduUEDoxGa3386C9wTyHmw8JgUie4elqyOlyzYf_IWWG5Zxb0NBLR6t6xmQCriX8w/exec';
@@ -62,14 +62,18 @@ export function SlotsProvider({ children }: { children: React.ReactNode }) {
   // Show the user-provided starting value until the server's first response.
   const [slots, setSlots] = useState<number | null>(26);
   const [isLive, setIsLive] = useState(false);
+  const requestVersion = useRef(0);
 
   const refresh = useCallback(async () => {
+    const version = ++requestVersion.current;
     try {
       const response = await requestStatus({ action: 'slots' });
       if (!validSlotCount(response.slots)) throw new Error('Invalid slots response');
+      if (version !== requestVersion.current) return;
       setSlots(response.slots);
       setIsLive(true);
     } catch {
+      if (version !== requestVersion.current) return;
       // Never present a cached number as live availability after failed reads.
       setSlots(null);
       setIsLive(false);
@@ -89,6 +93,8 @@ export function SlotsProvider({ children }: { children: React.ReactNode }) {
 
   const setConfirmedSlots = useCallback((count: number) => {
     if (validSlotCount(count)) {
+      // Invalidate earlier status requests that might return a stale count.
+      requestVersion.current++;
       setSlots(count);
       setIsLive(true);
     }
