@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { SHEET_URL, SlotsProvider, useSlots, waitForScreenshotReceipt } from './slots';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Play, Pause, Users, X, Star, Mic, Upload, CheckCircle, Loader2,
@@ -274,7 +275,6 @@ function GroupPreviewSlider({ images, mobile = false }: { images: string[]; mobi
 }
 
 // ─── Lead Modal ───────────────────────────────────────────────────────────────
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw7OeduUEDoxGa3386C9wTyHmw8JgUie4elqyOlyzYf_IWWG5Zxb0NBLR6t6xmQCriX8w/exec';
 
 function LeadModal({ onClose, onComplete, gate = false }: { onClose?: () => void; onComplete: () => void; gate?: boolean }) {
   const [name, setName]       = useState('');
@@ -751,6 +751,26 @@ function FAQ() {
   );
 }
 
+// A tiny, theme-aware status below the primary CTA (no progress bar).
+function SlotsCounter() {
+  const T = useT();
+  const { slots } = useSlots();
+  return (
+    <div role="status" aria-live="polite"
+      className="inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold leading-4"
+      style={{
+        color: T.DARK,
+        background: T.isDark ? 'rgba(25,68,241,0.10)' : 'rgba(25,68,241,0.06)',
+        border: '1px solid rgba(25,68,241,0.24)',
+      }}>
+      <span className="w-1.5 h-1.5 shrink-0 rounded-full" style={{ background: B1 }} />
+      {slots === null
+        ? <span style={{ color: T.MUTED }}>Slots temporarily unavailable</span>
+        : <><strong className="font-extrabold" style={{ color: B1 }}>{slots}</strong> {slots === 0 ? 'slots left' : 'only slots left'}</>}
+    </div>
+  );
+}
+
 // ─── Sticky CTA ───────────────────────────────────────────────────────────────
 function StickyCTA({ onJoin }: { onJoin: () => void }) {
   const T = useT();
@@ -852,6 +872,7 @@ function MobileApp() {
                 <ArrowRight className="w-4 h-4 relative z-10" />
               </motion.button>
 
+              <div className="-mt-1"><SlotsCounter /></div>
             </div>
           </div>
         </section>
@@ -937,6 +958,7 @@ export default function App() {
   if (!entered) {
     return (
       <ThemeProvider>
+        <SlotsProvider>
         <div className="min-h-screen w-full relative" style={{
           backgroundColor: '#000000',
           backgroundImage:
@@ -945,15 +967,18 @@ export default function App() {
         }}>
           <LeadModal gate onComplete={() => setEntered(true)} />
         </div>
+        </SlotsProvider>
       </ThemeProvider>
     );
   }
 
   return (
     <ThemeProvider>
-      {isMobile
-        ? <MobileApp />
-        : <DesktopWrapper />}
+      <SlotsProvider>
+        {isMobile
+          ? <MobileApp />
+          : <DesktopWrapper />}
+      </SlotsProvider>
     </ThemeProvider>
   );
 }
@@ -1192,6 +1217,7 @@ function DesktopVersion({ onOpenPayment, showPayment, onClosePayment, paymentTyp
           style={{ background: B1, boxShadow: '0 8px 22px rgba(25,68,241,.18)' }}>
           Join Datespot Now <ArrowRight className="w-5 h-5" />
         </button>
+        <div className="mt-3"><SlotsCounter /></div>
       </section>
 
       {/* What You Get — row list */}
@@ -1463,6 +1489,7 @@ function VoiceMessageBubble({ audioSrc, isUser }: { audioSrc?: string; isUser?: 
 type UploadState = 'idle' | 'verifying' | 'success';
 
 function PaymentModal({ onClose, paymentType, device }: { onClose: () => void; paymentType: 'full' | 'demo'; device: PricingDevice }) {
+  const { isLive, refresh, setConfirmedSlots } = useSlots();
   const UPI_ID        = 'BHARATPE2R0S0C1D6V46619@unitype';
   const { amount: AMOUNT, original: ORIGINAL_AMT } = PRICING[device];
   const TELEGRAM_LINK = 'https://t.me/+wRAGkbTVLLA0YzQ1';
@@ -1499,6 +1526,8 @@ function PaymentModal({ onClose, paymentType, device }: { onClose: () => void; p
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Allow choosing the same screenshot again after a failed attempt.
+    e.target.value = '';
     setUploadState('verifying');
     toast('Uploading screenshot...');
 
@@ -1506,20 +1535,32 @@ function PaymentModal({ onClose, paymentType, device }: { onClose: () => void; p
       const base64 = await compressImage(file);
       const name  = localStorage.getItem('ds_lead_name')  ?? '';
       const phone = localStorage.getItem('ds_lead_phone') ?? '';
+      const uploadId = window.crypto.randomUUID();
       await fetch(SHEET_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: 'screenshot', name, phone, mimeType: 'image/jpeg', fileName: `payment_${Date.now()}.jpg`, image: base64 }),
+        body: JSON.stringify({ action: 'screenshot', uploadId, name, phone, mimeType: 'image/jpeg', fileName: `payment_${Date.now()}.jpg`, image: base64 }),
       });
-    } catch {
+
+      // When the updated Apps Script is deployed, its receipt status confirms
+      // Drive save + sheet link before any frontend success is displayed.
+      // The server alone deducts the slot; clients never decrement locally.
+      if (isLive) {
+        const remaining = await waitForScreenshotReceipt(uploadId);
+        setConfirmedSlots(remaining);
+      } else {
+        // Keep the existing upload flow working until the Apps Script owner
+        // redeploys the new server version. Live count stays unavailable.
+        void refresh();
+      }
+    } catch (error) {
       setUploadState('idle');
-      toast.error('Screenshot upload failed. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Screenshot upload failed. Please try again.');
       return;
     }
 
-    // Apps Script returns an opaque response in no-cors mode, so this only
-    // confirms that the browser sent the request, not that payment was verified.
+    // Screenshots are received for review, not proof of verified payment.
     setTimeout(() => {
       setUploadState('success');
       toast.success('Screenshot sent for review.');
