@@ -57,8 +57,10 @@ function doPost(e) {
   catch (err) { return reply_('Invalid JSON'); }
   if (payload.action !== 'screenshot') return reply_('Unknown action');
 
-  const id = String(payload.uploadId || '');
-  if (!validReceiptId_(id)) return reply_('Invalid upload ID');
+  // Accept previously open website tabs using the older upload payload.
+  // New website clients provide a UUID so they can poll a receipt.
+  const providedId = String(payload.uploadId || '');
+  const id = validReceiptId_(providedId) ? providedId : Utilities.getUuid();
   const name = normalizeName_(payload.name);
   const phone = String(payload.phone || '').trim();
   if (!name || !/^[6-9]\d{9}$/.test(phone)) return rejectUpload_(id, 'Invalid member');
