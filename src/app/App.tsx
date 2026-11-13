@@ -764,9 +764,8 @@ function SlotsCounter() {
         border: '1px solid rgba(25,68,241,0.24)',
       }}>
       <span className="w-1.5 h-1.5 shrink-0 rounded-full" style={{ background: B1 }} />
-      {slots === null
-        ? <span style={{ color: T.MUTED }}>Slots temporarily unavailable</span>
-        : <><strong className="font-extrabold" style={{ color: B1 }}>{slots}</strong> {slots === 0 ? 'slots left' : 'only slots left'}</>}
+      <strong className="font-extrabold" style={{ color: B1 }}>{slots}</strong>
+      <span>{slots === 0 ? 'slots left' : 'only slots left'}</span>
     </div>
   );
 }
