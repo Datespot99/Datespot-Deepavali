@@ -5,7 +5,7 @@ export const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw7OeduUEDoxGa
 
 type SlotReply = { slots?: number; status?: 'saved' | 'error' | 'pending'; message?: string };
 type SlotContextValue = {
-  slots: number | null;
+  slots: number;
   isLive: boolean;
   refresh: () => Promise<void>;
   setConfirmedSlots: (count: number) => void;
@@ -58,9 +58,30 @@ export async function waitForScreenshotReceipt(id: string): Promise<number> {
   throw new Error('Upload confirmation timed out. Please try again.');
 }
 
+const STARTING_SLOTS = 26;
+const STORED_SLOTS_KEY = 'ds_last_known_slots_v1';
+
+function lastKnownSlots(): number {
+  try {
+    const saved = localStorage.getItem(STORED_SLOTS_KEY);
+    if (saved !== null) {
+      const parsed = Number(saved);
+      if (validSlotCount(parsed)) return parsed;
+    }
+  } catch {
+    // Storage may be unavailable in private browsing.
+  }
+  return STARTING_SLOTS;
+}
+
+function rememberSlots(slots: number) {
+  try { localStorage.setItem(STORED_SLOTS_KEY, String(slots)); }
+  catch { /* Cache is optional; the server remains authoritative. */ }
+}
+
 export function SlotsProvider({ children }: { children: React.ReactNode }) {
-  // Show the user-provided starting value until the server's first response.
-  const [slots, setSlots] = useState<number | null>(26);
+  // Always show the last confirmed count, or 26 before the first server reply.
+  const [slots, setSlots] = useState<number>(lastKnownSlots);
   const [isLive, setIsLive] = useState(false);
   const requestVersion = useRef(0);
 
@@ -71,11 +92,12 @@ export function SlotsProvider({ children }: { children: React.ReactNode }) {
       if (!validSlotCount(response.slots)) throw new Error('Invalid slots response');
       if (version !== requestVersion.current) return;
       setSlots(response.slots);
+      rememberSlots(response.slots);
       setIsLive(true);
     } catch {
       if (version !== requestVersion.current) return;
-      // Never present a cached number as live availability after failed reads.
-      setSlots(null);
+      // Keep showing the last known count if the service is temporarily
+      // offline. Do not turn a normal CTA into 'slots unavailable'.
       setIsLive(false);
     }
   }, []);
@@ -96,6 +118,7 @@ export function SlotsProvider({ children }: { children: React.ReactNode }) {
       // Invalidate earlier status requests that might return a stale count.
       requestVersion.current++;
       setSlots(count);
+      rememberSlots(count);
       setIsLive(true);
     }
   }, []);
